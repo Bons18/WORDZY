@@ -151,7 +151,7 @@ export const loginUser = async (credentials) => {
       },
       body: JSON.stringify({
         documento: credentials.document,
-        password: credentials.password,
+        contraseña: credentials.password,
       }),
     })
 

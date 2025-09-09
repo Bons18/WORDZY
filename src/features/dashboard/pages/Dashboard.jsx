@@ -334,6 +334,21 @@ const DashboardUpdated = () => {
     ]);
   };
 
+  // Función para manejar cambio de nivel en lecciones
+  const handleLessonsLevelChange = async (level) => {
+    setSelectedLessonsLevel(level);
+    await refreshLessonStats(level);
+    // Actualizar el estado local con los nuevos datos
+    const newStats = getCurrentLessonStats(level);
+    setLessonsStats(newStats);
+  };
+
+  // Efecto para actualizar estadísticas de lecciones cuando cambian los datos del backend
+  useEffect(() => {
+    const currentStats = getCurrentLessonStats(selectedLessonsLevel);
+    setLessonsStats(currentStats);
+  }, [lessonStats, selectedLessonsLevel]);
+
 
 
 
@@ -440,8 +455,7 @@ const DashboardUpdated = () => {
                         <button
                           key={level}
                           onClick={() => {
-                            setSelectedLessonsLevel(level)
-                            refreshLessonStats(level)
+                            handleLessonsLevelChange(level)
                             setShowLessonsLevelDropdown(false)
                           }}
                           className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 ${
@@ -456,69 +470,72 @@ const DashboardUpdated = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center">
-                <div className="relative w-[200px] h-[200px] mb-6">
-                  <svg className="w-full h-full" viewBox="0 0 200 200">
-                    <circle cx="100" cy="100" r="70" fill="none" stroke="#e6e6e6" strokeWidth="20" />
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="70"
-                      fill="none"
-                      stroke="#22c55e"
-                      strokeWidth="20"
-                      strokeDasharray={2 * Math.PI * 70}
-                      strokeDashoffset={2 * Math.PI * 70 - (2 * Math.PI * 70 * (lessonStats ? lessonStats.stats?.porcentajeGanadas || 0 : 0)) / 100}
-                      transform="rotate(-90 100 100)"
-                    />
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="70"
-                      fill="none"
-                      stroke="#ef4444"
-                      strokeWidth="20"
-                      strokeDasharray={`${(2 * Math.PI * 70 * (lessonStats ? lessonStats.stats?.porcentajePerdidas || 0 : 0)) / 100} ${
-                        2 * Math.PI * 70 - (2 * Math.PI * 70 * (lessonStats ? lessonStats.stats?.porcentajePerdidas || 0 : 0)) / 100
-                      }`}
-                      strokeDashoffset={2 * Math.PI * 70 - (2 * Math.PI * 70 * (lessonStats ? lessonStats.stats?.porcentajeGanadas || 0 : 0)) / 100}
-                      transform="rotate(-90 100 100)"
-                    />
-                    <circle cx="100" cy="100" r="50" fill="white" />
-                    <text
-                      x="100"
-                      y="90"
-                      textAnchor="middle"
-                      fontSize="14"
-                      fill="#627b87"
-                      fontFamily="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif"
-                    >
-                      Total
-                    </text>
-                    <text
-                      x="100"
-                      y="120"
-                      textAnchor="middle"
-                      fontSize="28"
-                      fontWeight="bold"
-                      fill="#1f384c"
-                      fontFamily="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif"
-                    >
-                      {lessonStats ? Math.round(lessonStats.stats?.porcentajeGanadas + lessonStats.stats?.porcentajePerdidas || 100) : 100}%
-                    </text>
-                  </svg>
+              <div className="space-y-4">
+                {/* Div para lecciones completadas */}
+                <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-green-800 mb-1">Lecciones Completadas</h3>
+                      <p className="text-sm text-green-600">Material de apoyo aprobado</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-green-700">
+                        {lessonStats ? Math.round(lessonStats.stats?.porcentajeGanadas || 0) : 0}%
+                      </div>
+                      <div className="text-sm text-green-600">
+                        {lessonStats ? lessonStats.stats?.leccionesGanadas || 0 : 0} de {lessonStats ? lessonStats.stats?.totalLecciones || 0 : 0}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <div className="w-full bg-green-200 rounded-full h-2">
+                      <div 
+                        className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${lessonStats ? lessonStats.stats?.porcentajeGanadas || 0 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                    <span className="text-gray-700">Ganadas</span>
-                    <span className="font-bold text-green-600 text-lg ml-2">{lessonStats ? Math.round(lessonStats.stats?.porcentajeGanadas || 0) : 0}%</span>
+                {/* Div para lecciones pendientes */}
+                <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-orange-800 mb-1">Lecciones Pendientes</h3>
+                      <p className="text-sm text-orange-600">Material de apoyo por completar</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-orange-700">
+                        {lessonStats ? Math.round(lessonStats.stats?.porcentajePerdidas || 0) : 0}%
+                      </div>
+                      <div className="text-sm text-orange-600">
+                        {lessonStats ? lessonStats.stats?.leccionesPerdidas || 0 : 0} de {lessonStats ? lessonStats.stats?.totalLecciones || 0 : 0}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-red-500"></div>
-                    <span className="text-gray-700">Perdidas</span>
-                    <span className="font-bold text-red-600 text-lg ml-2">{lessonStats ? Math.round(lessonStats.stats?.porcentajePerdidas || 0) : 0}%</span>
+                  <div className="mt-3">
+                    <div className="w-full bg-orange-200 rounded-full h-2">
+                      <div 
+                        className="bg-orange-600 h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${lessonStats ? lessonStats.stats?.porcentajePerdidas || 0 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Resumen total */}
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-blue-800 font-medium">Total de Lecciones:</span>
+                    <span className="text-blue-900 font-bold text-lg">
+                      {lessonStats ? lessonStats.stats?.totalLecciones || 0 : 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-blue-700 text-sm">Promedio de Puntuación:</span>
+                    <span className="text-blue-800 font-semibold">
+                      {lessonStats ? Math.round(lessonStats.stats?.promedioScore || 0) : 0}/100
+                    </span>
                   </div>
                 </div>
               </div>
