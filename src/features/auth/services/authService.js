@@ -1,6 +1,6 @@
 // Servicio de autenticación actualizado para usar la API local
-const API_BASE_URL = "http://localhost:3000/api/user"
-const AUTH_API_URL = "http://localhost:3000/api/auth"
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+const AUTH_API_URL = `${API_BASE_URL}/auth`
 
 // Función para determinar el rol basado en el documento
 const determineUserRole = (document) => {
@@ -29,8 +29,15 @@ export const findStudentByDocument = async (document) => {
       throw new Error("Error al buscar el estudiante")
     }
 
-    const data = await response.json()
-    return data.data && data.data.length > 0 ? data.data[0] : null
+    const responseData = await response.json()
+    console.log('📊 Respuesta recibida:', response.status)
+    console.log('📋 Datos completos:', responseData)
+    
+    // El backend devuelve los datos dentro de responseData.data
+    const data = responseData.data || responseData
+    console.log('📋 Datos extraídos:', data)
+    
+    return data && data.length > 0 ? data[0] : null
   } catch (error) {
     console.error("Error en findStudentByDocument:", error)
     throw error
@@ -143,6 +150,9 @@ export const loginUser = async (credentials) => {
   }
 
   try {
+    console.log('🚀 Intentando login con URL:', `${AUTH_API_URL}/login`);
+    console.log('🚀 Credenciales:', { documento: credentials.document, contraseña: '***' });
+    
     // Llamar al endpoint de login del backend
     const response = await fetch(`${AUTH_API_URL}/login`, {
       method: "POST",
@@ -154,8 +164,16 @@ export const loginUser = async (credentials) => {
         contraseña: credentials.password,
       }),
     })
+    
+    console.log('📡 Respuesta recibida:', response.status, response.statusText);
 
-    const data = await response.json()
+    const responseData = await response.json()
+    console.log('📊 Respuesta recibida:', response.status)
+    console.log('📋 Datos completos:', responseData)
+    
+    // El backend devuelve los datos dentro de responseData.data
+    const data = responseData.data || responseData
+    console.log('📋 Datos extraídos:', data)
 
     if (!response.ok) {
       // Manejo específico para rol desactivado (403)
