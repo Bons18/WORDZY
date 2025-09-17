@@ -65,7 +65,7 @@ const getProgramByFicha = async (fichaNumber) => {
  */
 const findApprenticeRole = async () => {
   try {
-    console.log("🔍 Buscando rol de Aprendiz...")
+    console.log("🔍 Buscando rol de aprendiz...")
     
     // Obtener token del localStorage
     const token = localStorage.getItem("wordzy_token")
@@ -88,16 +88,16 @@ const findApprenticeRole = async () => {
     }
 
     const roles = await response.json()
-    const apprenticeRole = roles.find((role) => role.name === "Aprendiz" && role.status === true)
+    const apprenticeRole = roles.find((role) => role.name === "aprendiz" && role.status === true)
 
     if (!apprenticeRole) {
-      throw new Error("No se encontró el rol 'Aprendiz' activo. Asegúrese de que esté creado en el sistema.")
+      throw new Error("No se encontró el rol 'aprendiz' activo. Asegúrese de que esté creado en el sistema.")
     }
 
-    console.log(`✅ Rol de Aprendiz encontrado: ${apprenticeRole._id}`)
+    console.log(`✅ Rol de aprendiz encontrado: ${apprenticeRole._id}`)
     return apprenticeRole._id
   } catch (error) {
-    console.error("❌ Error al buscar rol de Aprendiz:", error)
+    console.error("❌ Error al buscar rol de aprendiz:", error)
     throw error
   }
 }
@@ -403,8 +403,8 @@ export const validateTransformedApprentice = (apprentice) => {
     errors.push("Apellido inválido o muy corto")
   }
 
-  if (!apprentice.documento || apprentice.documento.trim().length < 6) {
-    errors.push("Documento inválido o muy corto")
+  if (!apprentice.documento || apprentice.documento.trim().length < 6 || apprentice.documento.trim().length > 10 || !/^\d{6,10}$/.test(apprentice.documento)) {
+    errors.push("El documento debe tener entre 6 y 10 dígitos numéricos")
   }
 
   if (!apprentice.correo || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(apprentice.correo)) {

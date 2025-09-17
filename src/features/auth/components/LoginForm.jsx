@@ -21,6 +21,7 @@ const LoginForm = ({ onLoginSuccess, login }) => {
     document: false,
     password: false
   })
+  const [hasInvalidChars, setHasInvalidChars] = useState(false)
 
   // Cargar credenciales guardadas al inicializar el componente
   useEffect(() => {
@@ -45,8 +46,10 @@ const LoginForm = ({ onLoginSuccess, login }) => {
     switch (name) {
       case 'document':
         if (!value) return 'El número de documento es requerido'
-        if (value.length < 6) return 'El documento debe tener al menos 6 dígitos'
         if (!/^[0-9]+$/.test(value)) return 'Solo se permiten números'
+        if (value.length < 6) return 'El documento debe contener al menos 6 dígitos.'
+        if (value.length > 10) return 'El documento debe contener exactamente 10 dígitos.'
+        // Si tiene entre 6 y 10 dígitos, es válido
         return ''
       case 'password':
         if (!value) return 'La contraseña es requerida'
@@ -59,7 +62,17 @@ const LoginForm = ({ onLoginSuccess, login }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    const newValue = type === "checkbox" ? checked : value
+    let newValue = type === "checkbox" ? checked : value
+    
+    // Controlar entrada del documento: permitir escribir pero detectar caracteres no numéricos
+    if (name === 'document') {
+      // Detectar si hay caracteres no numéricos
+      const hasNonNumeric = /[^0-9]/.test(value)
+      setHasInvalidChars(hasNonNumeric)
+      
+      // Permitir escribir cualquier carácter (no filtrar)
+      newValue = value
+    }
     
     setFormData((prev) => ({
       ...prev,
@@ -152,7 +165,9 @@ const LoginForm = ({ onLoginSuccess, login }) => {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Número de Documento */}
         <div className="w-full">
-          <label className="block text-sm font-semibold text-gray-800 mb-2">Número de Documento</label>
+          <label className="block text-sm font-semibold text-gray-800 mb-2">
+            Número de Documento
+          </label>
           <div className="relative">
             <User className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors ${
               fieldErrors.document && touched.document 
@@ -167,7 +182,7 @@ const LoginForm = ({ onLoginSuccess, login }) => {
               value={formData.document}
               onChange={handleChange}
               onBlur={handleBlur}
-              placeholder="Ingrese su número de documento"
+              placeholder="Ingrese su documento"
               className={`w-full pl-10 pr-12 py-3.5
                          border-2 rounded-xl
                          focus:outline-none focus:ring-2 focus:ring-offset-1
@@ -177,6 +192,8 @@ const LoginForm = ({ onLoginSuccess, login }) => {
                          bg-gray-50 focus:bg-white ${
                 fieldErrors.document && touched.document
                   ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                  : hasInvalidChars && formData.document
+                  ? 'border-orange-300 focus:border-orange-500 focus:ring-orange-200'
                   : formData.document && !fieldErrors.document && touched.document
                   ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
                   : 'border-gray-200 focus:border-blue-500 focus:ring-blue-200'
@@ -195,12 +212,27 @@ const LoginForm = ({ onLoginSuccess, login }) => {
                 ) : null}
               </div>
             )}
+            {/* Icono de advertencia para caracteres no numéricos */}
+            {hasInvalidChars && formData.document && !fieldErrors.document && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <AlertCircle className="text-orange-400" size={20} />
+              </div>
+            )}
           </div>
           {/* Mensaje de error */}
           {fieldErrors.document && touched.document && (
             <div className="mt-2 flex items-center space-x-2">
               <AlertCircle className="text-red-400 flex-shrink-0" size={16} />
               <span className="text-sm text-red-600 font-medium">{fieldErrors.document}</span>
+            </div>
+          )}
+          {/* Mensaje de advertencia para caracteres no numéricos */}
+          {hasInvalidChars && formData.document && !fieldErrors.document && (
+            <div className="mt-2 flex items-center space-x-2">
+              <AlertCircle className="text-orange-400 flex-shrink-0" size={16} />
+              <span className="text-sm text-orange-600 font-medium">
+                Solo se permiten números en el documento
+              </span>
             </div>
           )}
         </div>

@@ -10,6 +10,20 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [hasLoggedOut, setHasLoggedOut] = useState(false)
 
+  // Función para verificar si hay conectividad con el backend
+  const checkBackendConnectivity = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/health', {
+        method: 'GET',
+        timeout: 5000 // 5 segundos de timeout
+      })
+      return response.ok
+    } catch (error) {
+      console.warn('⚠️ Backend no disponible:', error.message)
+      return false
+    }
+  }
+
   // Función para obtener token válido del backend
   const getValidTokenFromBackend = async () => {
     try {
@@ -47,43 +61,90 @@ export const AuthProvider = ({ children }) => {
       }
       
       try {
-        // Verificar si hay un token válido
-        let token = localStorage.getItem("wordzy_token")
+        // Verificar si hay un token y datos de usuario guardados
+        const token = localStorage.getItem("wordzy_token")
+        const savedUser = localStorage.getItem("wordzy_user")
         
-        if (token) {
-          // Verificar el token con el backend
-          const userData = await verifyToken()
-          if (userData) {
-            // Token válido, cargar usuario
+        if (token && savedUser) {
+          try {
+            // Intentar parsear los datos del usuario guardados
+            const userData = JSON.parse(savedUser)
+            
+            // Siempre establecer el usuario primero para evitar logout automático
             setUser(userData)
-            localStorage.setItem("wordzy_user", JSON.stringify(userData))
-            console.log('✅ Usuario autenticado correctamente:', userData.name || `${userData.nombre} ${userData.apellido}`)
-          } else {
-            // Token inválido, limpiar todo y no intentar obtener uno nuevo automáticamente
-            console.log('❌ Token inválido, limpiando sesión')
-            localStorage.removeItem("wordzy_token")
+            console.log('🔄 Usuario cargado desde localStorage:', userData.name)
+            
+            // Verificar el token con el backend en segundo plano
+            try {
+              const verifiedUserData = await verifyToken()
+              
+              if (verifiedUserData) {
+                // Token válido, actualizar con datos verificados del backend
+                setUser(verifiedUserData)
+                localStorage.setItem("wordzy_user", JSON.stringify(verifiedUserData))
+                console.log('✅ Usuario verificado y actualizado:', verifiedUserData.name || `${verifiedUserData.nombre} ${verifiedUserData.apellido}`)
+              } else {
+                // Token inválido, pero mantener sesión local
+                console.log('⚠️ Token inválido, manteniendo sesión local para:', userData.name)
+              }
+            } catch (verifyError) {
+              // Error de verificación (probablemente red), mantener sesión local
+              console.log('⚠️ Error verificando token, manteniendo sesión local:', verifyError.message)
+            }
+          } catch (parseError) {
+            console.error('Error parseando datos de usuario:', parseError)
+            // Si hay error parseando, limpiar datos corruptos
             localStorage.removeItem("wordzy_user")
-            localStorage.removeItem("wordzy_session_id")
+            localStorage.removeItem("wordzy_token")
             setUser(null)
           }
-        } else {
-          // No hay token, verificar si hay datos de usuario guardados y limpiarlos
-          const savedUser = localStorage.getItem("wordzy_user")
-          if (savedUser) {
-            console.log('🧹 Limpiando datos de usuario sin token válido')
-            localStorage.removeItem("wordzy_user")
+        } else if (token && !savedUser) {
+          // Hay token pero no datos de usuario, verificar con backend
+          try {
+            const userData = await verifyToken()
+            if (userData) {
+              setUser(userData)
+              localStorage.setItem("wordzy_user", JSON.stringify(userData))
+              console.log('✅ Usuario recuperado del backend:', userData.name || `${userData.nombre} ${userData.apellido}`)
+            } else {
+              console.log('❌ Token inválido, limpiando sesión')
+              localStorage.removeItem("wordzy_token")
+              localStorage.removeItem("wordzy_session_id")
+              setUser(null)
+            }
+          } catch (error) {
+            console.error('Error recuperando usuario:', error)
+            localStorage.removeItem("wordzy_token")
+            setUser(null)
           }
+        } else if (!token && savedUser) {
+          // Hay datos de usuario pero no token, limpiar datos obsoletos
+          console.log('🧹 Limpiando datos de usuario sin token válido')
+          localStorage.removeItem("wordzy_user")
+          setUser(null)
+        } else {
+          // No hay token ni datos de usuario
           setUser(null)
           console.log('🔒 No hay sesión activa')
         }
       } catch (error) {
         console.error("Error initializing auth:", error)
-        // En caso de error, limpiar todo y no intentar recuperar automáticamente
-        localStorage.removeItem("wordzy_token")
-        localStorage.removeItem("wordzy_user")
-        localStorage.removeItem("wordzy_session_id")
-        setUser(null)
-        console.log('🔒 Sesión limpiada debido a error de inicialización')
+        // En caso de error de red, mantener sesión local si existe
+        const savedUser = localStorage.getItem("wordzy_user")
+        if (savedUser) {
+          try {
+            const userData = JSON.parse(savedUser)
+            setUser(userData)
+            console.log('🔄 Manteniendo sesión local debido a error de red:', userData.name)
+          } catch (parseError) {
+            console.error('Error parseando datos guardados:', parseError)
+            localStorage.removeItem("wordzy_user")
+            setUser(null)
+          }
+        } else {
+          setUser(null)
+        }
+        console.log('⚠️ Error de inicialización, sesión mantenida localmente si existe')
       } finally {
         setIsLoading(false)
       }
@@ -151,7 +212,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("wordzy_user")
       localStorage.removeItem("wordzy_token")
       localStorage.removeItem("wordzy_session_id")
-      console.log('🚪 Sesión cerrada localmente')
+      // También limpiar credenciales recordadas si existen
+      localStorage.removeItem("rememberedCredentials")
+      console.log('🚪 Sesión cerrada completamente - todos los datos limpiados')
     }
   }
 

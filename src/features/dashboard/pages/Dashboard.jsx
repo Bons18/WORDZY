@@ -657,8 +657,8 @@ const DashboardUpdated = () => {
                       const color = colors[index] || colors[4];
                       
                       return (
-                        <div key={item.documento || item.id || index} className={`flex items-center justify-between p-3 ${color.bg} rounded-lg border-l-4 ${color.border}`}>
-                          <div className="flex items-center gap-3">
+                        <div key={item.documento || item.id || index} className={`flex items-center justify-between p-4 ${color.bg} rounded-lg border-l-4 ${color.border} mx-2`}>
+                          <div className="flex items-center gap-4">
                             <div className={`w-8 h-8 ${color.badge} text-white rounded-full flex items-center justify-center text-sm font-bold`}>
                               {index + 1}
                             </div>
@@ -671,7 +671,7 @@ const DashboardUpdated = () => {
                                     : item.nombre
                                 }
                               </span>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-600 mt-1">
                                 {activeRankingTab === "aprendices" && (
                                   item.ficha && Array.isArray(item.ficha) && item.ficha.length > 0 
                                     ? `Ficha ${item.ficha[0]}` 

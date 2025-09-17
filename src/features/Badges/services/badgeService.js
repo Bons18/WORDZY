@@ -124,7 +124,7 @@ export const createBadge = async (badgeData) => {
       const formData = new FormData()
       
       // Agregar campos de texto
-      formData.append('name', badgeData.badgeName?.trim() || '')
+      formData.append('name', badgeData.name?.trim() || '')
       formData.append('points', badgeData.points || '')
       formData.append('description', badgeData.description?.trim() || '')
       formData.append('startDate', badgeData.startDate || '')
@@ -146,7 +146,7 @@ export const createBadge = async (badgeData) => {
       console.log('🔍 CREATE BADGE - Razón: badgeData.file =', badgeData.file, 'instanceof File =', badgeData.file instanceof File)
       // Si no hay archivo, usar JSON
       body = JSON.stringify({
-        name: badgeData.badgeName?.trim(),
+        name: badgeData.name?.trim(),
         points: parseInt(badgeData.points),
         description: badgeData.description?.trim(),
         startDate: badgeData.startDate,
@@ -401,21 +401,34 @@ export const validateBadgeData = (badgeData) => {
   const badgeName = badgeData.badgeName || badgeData.name
   if (!badgeName || badgeName.trim() === "") {
     errors.badgeName = "El nombre de la insignia es requerido"
+  } else if (badgeName.trim().length > 100) {
+    errors.badgeName = "El nombre no puede exceder 100 caracteres"
+  } else if (badgeName.trim().length < 3) {
+    errors.badgeName = "El nombre debe tener al menos 3 caracteres"
   }
 
-  // Validar puntos
+  // Validar puntos con mayor robustez
   const points = badgeData.points
-  if (!points || points <= 0) {
+  if (!points && points !== 0) {
+    errors.points = "Los puntos son requeridos"
+  } else if (isNaN(points) || !Number.isInteger(Number(points))) {
+    errors.points = "Los puntos deben ser un número entero"
+  } else if (Number(points) <= 0) {
     errors.points = "Los puntos deben ser un número mayor a 0"
+  } else if (Number(points) > 100000) {
+    errors.points = "Los puntos no pueden exceder 100,000"
   }
 
   // Validar descripción
   if (!badgeData.description || badgeData.description.trim() === "") {
     errors.description = "La descripción es requerida"
+  } else if (badgeData.description.trim().length < 10) {
+    errors.description = "La descripción debe tener al menos 10 caracteres"
+  } else if (badgeData.description.trim().length > 500) {
+    errors.description = "La descripción no puede exceder 500 caracteres"
   }
 
-  // Validar imagen (requerida solo para creación, opcional para edición)
-  // Para edición, permitir que no haya archivo nuevo si ya existe una imagen
+  // Validar imagen con mayor detalle
   const hasNewFile = badgeData.file && badgeData.file instanceof File
   const hasExistingImage = badgeData.filePreview || badgeData.existingImage || badgeData.image
   const isEditing = badgeData.existingImage || (badgeData.filePreview && !hasNewFile)
@@ -425,14 +438,34 @@ export const validateBadgeData = (badgeData) => {
     errors.file = "La imagen de la insignia es requerida"
   }
 
+  // Validar tipo y tamaño de archivo si hay uno nuevo
+  if (hasNewFile) {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml', 'image/webp']
+    if (!allowedTypes.includes(badgeData.file.type)) {
+      errors.file = "Solo se permiten archivos de imagen (JPG, PNG, SVG, WebP)"
+    } else if (badgeData.file.size > 5 * 1024 * 1024) { // 5MB
+      errors.file = "La imagen no puede exceder 5MB"
+    }
+  }
+
   // Validar fecha de inicio
   if (!badgeData.startDate) {
     errors.startDate = "La fecha de inicio es requerida"
+  } else {
+    const startDate = new Date(badgeData.startDate)
+    if (isNaN(startDate.getTime())) {
+      errors.startDate = "La fecha de inicio no es válida"
+    }
   }
 
   // Validar fecha de fin
   if (!badgeData.endDate) {
     errors.endDate = "La fecha de fin es requerida"
+  } else {
+    const endDate = new Date(badgeData.endDate)
+    if (isNaN(endDate.getTime())) {
+      errors.endDate = "La fecha de fin no es válida"
+    }
   }
 
   // Validar que la fecha de fin sea posterior a la de inicio
@@ -440,8 +473,24 @@ export const validateBadgeData = (badgeData) => {
     const startDate = new Date(badgeData.startDate)
     const endDate = new Date(badgeData.endDate)
     
-    if (startDate >= endDate) {
-      errors.endDate = "La fecha de fin debe ser posterior a la fecha de inicio"
+    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+      if (startDate >= endDate) {
+        errors.endDate = "La fecha de fin debe ser posterior a la fecha de inicio"
+      }
+      
+      // Validar que las fechas no sean demasiado en el pasado (opcional)
+      const now = new Date()
+      const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+      
+      if (startDate < oneYearAgo) {
+        errors.startDate = "La fecha de inicio no puede ser anterior a un año"
+      }
+      
+      // Validar que la duración no sea excesiva
+      const maxDuration = 5 * 365 * 24 * 60 * 60 * 1000 // 5 años en milisegundos
+      if (endDate.getTime() - startDate.getTime() > maxDuration) {
+        errors.endDate = "La duración de la insignia no puede exceder 5 años"
+      }
     }
   }
 
@@ -462,7 +511,7 @@ export const formatBadgeForSubmission = (formData) => {
   }
 
   return {
-    badgeName: formData.badgeName?.trim(),
+    name: formData.name?.trim(),
     points: parseInt(formData.points),
     description: formData.description?.trim(),
     startDate: formatDateForBackend(formData.startDate),

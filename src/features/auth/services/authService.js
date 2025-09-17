@@ -144,9 +144,9 @@ export const loginUser = async (credentials) => {
     throw new Error("Todos los campos son requeridos")
   }
 
-  // Validar que el documento solo contenga números
-  if (!/^\d+$/.test(credentials.document)) {
-    throw new Error("El documento debe contener solo números")
+  // Validar que el documento solo contenga números y tenga entre 6 y 10 dígitos
+  if (!/^\d{6,10}$/.test(credentials.document)) {
+    throw new Error("El documento debe tener entre 6 y 10 dígitos numéricos")
   }
 
   try {
@@ -189,21 +189,21 @@ export const loginUser = async (credentials) => {
     }
     
     // Guardar sessionId si está disponible
-    if (data.message.sessionId) {
-      localStorage.setItem("wordzy_session_id", data.message.sessionId)
+    if (data.sessionId) {
+      localStorage.setItem("wordzy_session_id", data.sessionId)
     }
 
     // Formatear el usuario correctamente antes de retornarlo
     const formattedUser = {
-      ...data.message.user,
-      name: data.message.user.name || `${data.message.user.nombre || ''} ${data.message.user.apellido || ''}`.trim()
+      ...data.user,
+      name: data.user.name || `${data.user.nombre || ''} ${data.user.apellido || ''}`.trim()
     }
     
     // Retornar toda la respuesta (usuario, token y sessionId)
     return {
       user: formattedUser,
-      token: data.message.token,
-      sessionId: data.message.sessionId
+      token: data.token,
+      sessionId: data.sessionId
     }
   } catch (error) {
     // Si es un error de red o API, mostrar mensaje genérico
@@ -247,9 +247,9 @@ export const verifyToken = async () => {
     })
 
     if (!response.ok) {
-      // Token inválido o expirado, limpiar localStorage
-      localStorage.removeItem("wordzy_token")
-      localStorage.removeItem("wordzy_user")
+      // Token inválido o expirado, pero NO limpiar localStorage aquí
+      // Dejar que el AuthContext maneje la persistencia
+      console.warn('⚠️ Token inválido, pero manteniendo datos locales')
       return null
     }
 
@@ -264,9 +264,9 @@ export const verifyToken = async () => {
     return formattedUser
   } catch (error) {
     console.error("Error verificando token:", error)
-    // En caso de error, limpiar localStorage
-    localStorage.removeItem("wordzy_token")
-    localStorage.removeItem("wordzy_user")
+    // En caso de error de red, NO limpiar localStorage
+    // Dejar que el AuthContext maneje la persistencia
+    console.warn('⚠️ Error de red, manteniendo datos locales')
     return null
   }
 }

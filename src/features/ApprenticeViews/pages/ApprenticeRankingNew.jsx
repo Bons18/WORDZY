@@ -32,10 +32,28 @@ import {
   BarChart3,
   User,
   Star,
+  AlertCircle,
+  Loader2,
 } from "lucide-react"
 import ApprenticeHeader from "../components/ApprenticeHeader"
+import { useRanking } from "../hooks/useRanking"
 
 const ApprenticeRankingNew = () => {
+  // Hook para manejar datos del ranking
+  const {
+    loading,
+    error,
+    fichas,
+    programas,
+    rankings,
+    metrics,
+    getRankingByFicha,
+    getRankingByPrograma,
+    getPodium,
+    getCurrentUserPosition,
+    refreshData
+  } = useRanking()
+
   // Estado para controlar la pestaña activa
   const [activeTab, setActiveTab] = useState("aprendices")
   // Estado para la paginación
@@ -49,219 +67,67 @@ const ApprenticeRankingNew = () => {
   const [selectedPrograma, setSelectedPrograma] = useState("")
   const [showFichaDropdown, setShowFichaDropdown] = useState(false)
   const [showProgramaDropdown, setShowProgramaDropdown] = useState(false)
+  const [isFilterLoading, setIsFilterLoading] = useState(false)
 
-  // Lista de fichas disponibles (simuladas)
-  const fichas = [
-    "2889927-801",
-    "2889927-802",
-    "2889927-803",
-    "2889927-804",
-    "2889927-805",
-    "2889927-806",
-    "2889927-807",
-    "2889927-808",
-  ]
+  // Función para manejar el cambio de filtro por ficha
+  const handleFichaChange = async (fichaCode) => {
+    if (fichaCode === selectedFicha) return
+    
+    setIsFilterLoading(true)
+    setSelectedFicha(fichaCode)
+    setCurrentPage(1)
+    
+    if (fichaCode && activeTab === 'ficha') {
+      await getRankingByFicha(fichaCode)
+    }
+    
+    setIsFilterLoading(false)
+  }
 
-  // Lista de programas disponibles
-  const programas = ["Análisis y desarrollo de software", "Técnico en programación"]
+  // Función para limpiar filtro de ficha
+  const handleClearFichaFilter = () => {
+    setSelectedFicha("")
+    setCurrentPage(1)
+  }
 
-  // Datos para cada categoría (ampliados para demostrar la paginación)
-  const categoryData = {
-    ficha: {
-      podium: [
-        { position: 2, name: "Carlos M.", points: 685 },
-        { position: 1, name: "Laura S.", points: 890 },
-        { position: 3, name: "Miguel A.", points: 542 },
-      ],
-      currentUser: {
-        position: 5,
-        name: "Laura S.",
-        points: 890,
-        ficha: "2889927-801",
-      },
-      ranking: [
-        { id: 1, name: "Laura S.", points: 890, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        { id: 2, name: "Carlos M.", points: 685, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        { id: 3, name: "Miguel A.", points: 542, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        { id: 4, name: "Ana Gómez", points: 520, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        { id: 5, name: "Pedro Ruiz", points: 480, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        {
-          id: 6,
-          name: "Sofía Vargas",
-          points: 450,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 7,
-          name: "Daniel López",
-          points: 420,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 8,
-          name: "Valentina Torres",
-          points: 410,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 9,
-          name: "Javier Mendoza",
-          points: 390,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 10,
-          name: "Camila Rojas",
-          points: 370,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-      ],
-    },
-    aprendices: {
-      podium: [
-        { position: 2, name: "Brayan R.", points: 724 },
-        { position: 1, name: "Rafael P.", points: 967 },
-        { position: 3, name: "Zurangely P.", points: 601 },
-      ],
-      currentUser: {
-        position: 8,
-        name: "Rafael P.",
-        points: 967,
-        ficha: "2889927-801",
-      },
-      ranking: [
-        { id: 1, name: "Rafael P.", points: 967, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        {
-          id: 2,
-          name: "Dickson Mosquera",
-          points: 508,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 3,
-          name: "Zurangely Mota",
-          points: 490,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        { id: 4, name: "Juan Pérez", points: 475, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        {
-          id: 5,
-          name: "Diego Alejandro",
-          points: 450,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 6,
-          name: "María González",
-          points: 430,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 7,
-          name: "Juan Martínez",
-          points: 410,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 8,
-          name: "Brayan Cortez",
-          points: 400,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 9,
-          name: "Ana Martínez",
-          points: 395,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 10,
-          name: "Carlos Rodríguez",
-          points: 390,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-      ],
-    },
-    programa: {
-      podium: [
-        { position: 2, name: "Alejandro G.", points: 845 },
-        { position: 1, name: "Carolina M.", points: 1024 },
-        { position: 3, name: "Santiago R.", points: 780 },
-      ],
-      currentUser: {
-        position: 4,
-        name: "Carolina M.",
-        points: 1024,
-        ficha: "2889927-801",
-      },
-      ranking: [
-        {
-          id: 1,
-          name: "Carolina M.",
-          points: 1024,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 2,
-          name: "Alejandro G.",
-          points: 845,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 3,
-          name: "Santiago R.",
-          points: 780,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 4,
-          name: "Valentina T.",
-          points: 720,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        { id: 5, name: "Mateo L.", points: 650, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        {
-          id: 6,
-          name: "Isabella S.",
-          points: 580,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        {
-          id: 7,
-          name: "Sebastián V.",
-          points: 520,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-        { id: 8, name: "Camila F.", points: 490, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        { id: 9, name: "Nicolás H.", points: 450, ficha: "2889927-801", programa: "Análisis y desarrollo de software" },
-        {
-          id: 10,
-          name: "Mariana L.",
-          points: 420,
-          ficha: "2889927-801",
-          programa: "Análisis y desarrollo de software",
-        },
-      ],
-    },
+  // Función para manejar el cambio de filtro por programa
+  const handleProgramaChange = async (programa) => {
+    if (programa === selectedPrograma) return
+    
+    setIsFilterLoading(true)
+    setSelectedPrograma(programa)
+    setCurrentPage(1)
+    
+    if (programa && activeTab === 'programa') {
+      await getRankingByPrograma(programa)
+    }
+    
+    setIsFilterLoading(false)
+  }
+
+  // Función para limpiar filtro de programa
+  const handleClearProgramaFilter = () => {
+    setSelectedPrograma("")
+    setCurrentPage(1)
+  }
+
+  // Función para manejar el cambio de pestaña
+  const handleTabChange = async (tabKey) => {
+    if (tabKey === activeTab) return
+    
+    setActiveTab(tabKey)
+    setCurrentPage(1)
+    
+    // Cargar datos específicos según la pestaña
+    if (tabKey === 'ficha' && selectedFicha) {
+      setIsFilterLoading(true)
+      await getRankingByFicha(selectedFicha)
+      setIsFilterLoading(false)
+    } else if (tabKey === 'programa' && selectedPrograma) {
+      setIsFilterLoading(true)
+      await getRankingByPrograma(selectedPrograma)
+      setIsFilterLoading(false)
+    }
   }
 
   // Función para obtener el icono según la posición
@@ -321,9 +187,45 @@ const ApprenticeRankingNew = () => {
     }
   }
 
+  // Función para obtener los datos actuales según la pestaña activa
+  const getCurrentData = () => {
+    if (activeTab === 'aprendices') {
+      return {
+        podium: getPodium('aprendices'),
+        currentUser: getCurrentUserPosition('aprendices'),
+        ranking: rankings.aprendices || []
+      }
+    } else if (activeTab === 'ficha') {
+      return {
+        podium: getPodium('ficha'),
+        currentUser: getCurrentUserPosition('ficha'),
+        ranking: rankings.ficha || []
+      }
+    } else if (activeTab === 'programa') {
+      return {
+        podium: getPodium('programa'),
+        currentUser: getCurrentUserPosition('programa'),
+        ranking: rankings.programa || []
+      }
+    }
+    
+    return {
+      podium: getPodium('aprendices'),
+      currentUser: getCurrentUserPosition('aprendices'),
+      ranking: rankings.aprendices || []
+    }
+  }
+
   // Función para filtrar datos según los filtros seleccionados
   const getFilteredData = () => {
-    let data = categoryData[activeTab].ranking
+    const currentData = getCurrentData()
+    let data = currentData.ranking
+
+    // Asegurar que data sea un array
+    if (!Array.isArray(data)) {
+      console.warn('⚠️ Los datos del ranking no son un array:', data)
+      return []
+    }
 
     if (selectedFicha) {
       data = data.filter((item) => item.ficha === selectedFicha)
@@ -354,7 +256,7 @@ const ApprenticeRankingNew = () => {
     const itemsToShow = filteredData.slice(startIndex, endIndex)
 
     setDisplayedItems(itemsToShow)
-  }, [activeTab, selectedFicha, selectedPrograma, currentPage, itemsPerPage])
+  }, [activeTab, selectedFicha, selectedPrograma, currentPage, itemsPerPage, rankings])
 
   // Función para cambiar de página
   const handlePageChange = (newPage) => {
@@ -388,10 +290,7 @@ const ApprenticeRankingNew = () => {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => {
-                    setActiveTab(tab.key)
-                    setCurrentPage(1)
-                  }}
+                  onClick={() => handleTabChange(tab.key)}
                   className={`px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 ${
                     activeTab === tab.key
                       ? "bg-gradient-to-r from-[#1f384c] to-[#2a4a64] text-white shadow-xl border-2 border-[#1f384c]"
@@ -408,13 +307,13 @@ const ApprenticeRankingNew = () => {
           </div>
 
           {/* Filters */}
-          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b border-blue-200">
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 lg:gap-6 items-start sm:items-center">
-              <div className="flex items-center gap-3">
+          <div className="px-6 sm:px-8 lg:px-10 py-6 sm:py-8 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b border-blue-200">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 lg:gap-8 items-start sm:items-center">
+              <div className="flex items-center gap-4">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg">
                   <SlidersHorizontal size={20} className="text-white" />
                 </div>
-                <span className="text-lg font-bold text-gray-800 bg-white px-4 py-2 rounded-full shadow-md"><Target className="w-4 h-4 inline mr-2" />Filtros Avanzados:</span>
+                <span className="text-lg font-bold text-gray-800 bg-white px-5 py-3 rounded-full shadow-md"><Target className="w-4 h-4 inline mr-2" />Filtros Avanzados:</span>
               </div>
 
               {/* Filtro por Ficha */}
@@ -424,17 +323,24 @@ const ApprenticeRankingNew = () => {
                     setShowFichaDropdown(!showFichaDropdown)
                     setShowProgramaDropdown(false)
                   }}
-                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-white to-blue-50 border-2 border-blue-200 rounded-xl text-sm font-bold hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[180px]"
+                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-white to-blue-50 border-2 border-blue-200 rounded-xl text-sm font-bold hover:from-blue-50 hover:to-blue-100 hover:border-blue-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[180px]" disabled={isFilterLoading}
                 >
-                  <span className="text-blue-700"><Building2 className="w-4 h-4 inline mr-1" />{selectedFicha || "Todas las fichas"}</span>
-                  <ChevronDown size={16} className="text-blue-500" />
+                  <span className="text-blue-700">
+                    <Building2 className="w-4 h-4 inline mr-1" />
+                    {selectedFicha || "Todas las fichas"}
+                  </span>
+                  {isFilterLoading ? (
+                    <Loader2 size={16} className="text-blue-500 animate-spin" />
+                  ) : (
+                    <ChevronDown size={16} className="text-blue-500" />
+                  )}
                 </button>
 
                 {showFichaDropdown && (
                   <div className="absolute top-full left-0 mt-3 w-64 bg-white border-2 border-blue-200 rounded-xl shadow-2xl z-10 overflow-hidden">
                     <button
                       onClick={() => {
-                        setSelectedFicha("")
+                        handleClearFichaFilter()
                         setShowFichaDropdown(false)
                       }}
                       className="w-full text-left px-6 py-4 text-sm font-semibold hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 transition-all duration-200 border-b border-blue-100 text-blue-700"
@@ -445,9 +351,9 @@ const ApprenticeRankingNew = () => {
                       <button
                         key={ficha}
                         onClick={() => {
-                          setSelectedFicha(ficha)
-                          setShowFichaDropdown(false)
-                        }}
+                        handleFichaChange(ficha)
+                        setShowFichaDropdown(false)
+                      }}
                         className="w-full text-left px-6 py-4 text-sm font-medium hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 transition-all duration-200 text-gray-700 hover:text-blue-700"
                       >
                         <FileText className="w-4 h-4 inline mr-1" />{ficha}
@@ -464,17 +370,24 @@ const ApprenticeRankingNew = () => {
                     setShowProgramaDropdown(!showProgramaDropdown)
                     setShowFichaDropdown(false)
                   }}
-                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-white to-purple-50 border-2 border-purple-200 rounded-xl text-sm font-bold hover:from-purple-50 hover:to-purple-100 hover:border-purple-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[220px]"
+                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-white to-purple-50 border-2 border-purple-200 rounded-xl text-sm font-bold hover:from-purple-50 hover:to-purple-100 hover:border-purple-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[220px]" disabled={isFilterLoading}
                 >
-                  <span className="text-purple-700"><GraduationCap className="w-4 h-4 inline mr-1" />{selectedPrograma || "Todos los programas"}</span>
-                  <ChevronDown size={16} className="text-purple-500" />
+                  <span className="text-purple-700">
+                    <GraduationCap className="w-4 h-4 inline mr-1" />
+                    {selectedPrograma || "Todos los programas"}
+                  </span>
+                  {isFilterLoading ? (
+                    <Loader2 size={16} className="text-purple-500 animate-spin" />
+                  ) : (
+                    <ChevronDown size={16} className="text-purple-500" />
+                  )}
                 </button>
 
                 {showProgramaDropdown && (
                   <div className="absolute top-full left-0 mt-3 w-80 bg-white border-2 border-purple-200 rounded-xl shadow-2xl z-10 overflow-hidden">
                     <button
                       onClick={() => {
-                        setSelectedPrograma("")
+                        handleClearProgramaFilter()
                         setShowProgramaDropdown(false)
                       }}
                       className="w-full text-left px-6 py-4 text-sm font-semibold hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 transition-all duration-200 border-b border-purple-100 text-purple-700"
@@ -485,9 +398,9 @@ const ApprenticeRankingNew = () => {
                       <button
                         key={programa}
                         onClick={() => {
-                          setSelectedPrograma(programa)
-                          setShowProgramaDropdown(false)
-                        }}
+                        handleProgramaChange(programa)
+                        setShowProgramaDropdown(false)
+                      }}
                         className="w-full text-left px-6 py-4 text-sm font-medium hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 transition-all duration-200 text-gray-700 hover:text-purple-700"
                       >
                         <BookOpen className="w-4 h-4 inline mr-1" />{programa}
@@ -510,8 +423,35 @@ const ApprenticeRankingNew = () => {
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="px-4 sm:px-6 lg:px-8 py-12 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                <p className="text-gray-600 font-medium">Cargando datos del ranking...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="px-4 sm:px-6 lg:px-8 py-12 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <AlertCircle className="w-8 h-8 text-red-500" />
+                <p className="text-red-600 font-medium">Error al cargar los datos: {error}</p>
+                <button 
+                  onClick={refreshData}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Reintentar
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Podium */}
-          <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
+          {!loading && !error && (
+            <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
             <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center flex items-center justify-center gap-3">
               <Trophy className="w-8 h-8 text-yellow-500" />
               Top 3
@@ -528,8 +468,8 @@ const ApprenticeRankingNew = () => {
                   <div className="text-4xl mb-2">{getPodiumIcon(2)}</div>
                   <span className="text-sm font-bold">2°</span>
                 </div>
-                <p className="font-bold text-lg text-gray-800 mb-1">{categoryData[activeTab].podium[0].name}</p>
-                <p className="text-sm font-semibold text-gray-600 bg-white bg-opacity-70 rounded-full px-3 py-1">{categoryData[activeTab].podium[0].points} pts</p>
+                <p className="font-bold text-lg text-gray-800 mb-1">{getCurrentData().podium[0]?.name || 'N/A'}</p>
+                <p className="text-sm font-semibold text-gray-600 bg-white bg-opacity-70 rounded-full px-3 py-1">{getCurrentData().podium[0]?.points || 0} pts</p>
               </div>
 
               {/* Primer lugar */}
@@ -542,8 +482,8 @@ const ApprenticeRankingNew = () => {
                   <div className="text-5xl mb-3">{getPodiumIcon(1)}</div>
                   <span className="text-base font-bold">1°</span>
                 </div>
-                <p className="font-bold text-xl text-gray-800 mb-1">{categoryData[activeTab].podium[1].name}</p>
-                <p className="text-base font-semibold text-gray-600 bg-white bg-opacity-70 rounded-full px-4 py-1">{categoryData[activeTab].podium[1].points} pts</p>
+                <p className="font-bold text-xl text-gray-800 mb-1">{getCurrentData().podium[1]?.name || 'N/A'}</p>
+                <p className="text-base font-semibold text-gray-600 bg-white bg-opacity-70 rounded-full px-4 py-1">{getCurrentData().podium[1]?.points || 0} pts</p>
               </div>
 
               {/* Tercer lugar */}
@@ -556,28 +496,29 @@ const ApprenticeRankingNew = () => {
                   <div className="text-4xl mb-2">{getPodiumIcon(3)}</div>
                   <span className="text-sm font-bold">3°</span>
                 </div>
-                <p className="font-bold text-lg text-gray-800 mb-1">{categoryData[activeTab].podium[2].name}</p>
-                <p className="text-sm font-semibold text-gray-600 bg-white bg-opacity-70 rounded-full px-3 py-1">{categoryData[activeTab].podium[2].points} pts</p>
+                <p className="font-bold text-lg text-gray-800 mb-1">{getCurrentData().podium[2]?.name || 'N/A'}</p>
+                <p className="text-sm font-semibold text-gray-600 bg-white bg-opacity-70 rounded-full px-3 py-1">{getCurrentData().podium[2]?.points || 0} pts</p>
               </div>
             </div>
           </div>
+          )}
 
           {/* Current User Position */}
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-y border-blue-200">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white rounded-xl p-4 sm:p-6 shadow-md border border-blue-200 gap-4 sm:gap-0">
               <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-[#1f384c] to-[#162a3a] rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                  {getPositionIcon(categoryData[activeTab].currentUser.position)}
+                  {getPositionIcon(getCurrentData().currentUser?.position || 0)}
                 </div>
                 <div>
                   <div className="font-semibold text-lg text-gray-800">Tu posición</div>
-                  <div className="text-sm text-gray-600 font-medium">{categoryData[activeTab].currentUser.name}</div>
-                  <div className="text-xs text-gray-500">{categoryData[activeTab].currentUser.ficha}</div>
+                  <div className="text-sm text-gray-600 font-medium">{getCurrentData().currentUser?.name || 'Usuario'}</div>
+                  <div className="text-xs text-gray-500">{getCurrentData().currentUser?.ficha || 'N/A'}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-bold text-xl text-[#1f384c]">{categoryData[activeTab].currentUser.points} pts</div>
-                <div className="text-sm text-gray-500 font-medium bg-[#1f384c] bg-opacity-10 px-3 py-1 rounded-full">Posición #{categoryData[activeTab].currentUser.position}</div>
+                <div className="font-bold text-xl text-[#1f384c]">{getCurrentData().currentUser?.points || 0} pts</div>
+                <div className="text-sm text-gray-500 font-medium bg-[#1f384c] bg-opacity-10 px-3 py-1 rounded-full">Posición #{getCurrentData().currentUser?.position || 'N/A'}</div>
               </div>
             </div>
           </div>
@@ -617,7 +558,7 @@ const ApprenticeRankingNew = () => {
                   <tbody className="divide-y-2 divide-gray-100">
                     {displayedItems.map((item, index) => {
                       const globalPosition = (currentPage - 1) * itemsPerPage + index + 1
-                      const isCurrentUser = item.name === categoryData[activeTab].currentUser.name
+                      const isCurrentUser = item.name === getCurrentData().currentUser?.name
 
                       return (
                         <tr

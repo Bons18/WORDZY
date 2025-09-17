@@ -4,12 +4,20 @@ const API_KEY = 'sara_d32775a2ea8a39a3.a14bb968e21a6be6821d19f2764945338ba182b97
 // Obtener perfil de usuario
 export const getUserProfile = async (userId) => {
   try {
+    const token = localStorage.getItem('wordzy_token')
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY
+    }
+    
+    // Agregar token de autenticación si existe
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+    
     const response = await fetch(`${API_BASE_URL}/user/${userId}/profile`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY
-      }
+      headers: headers
     })
 
     if (!response.ok) {
@@ -28,12 +36,20 @@ export const getUserProfile = async (userId) => {
 // Actualizar perfil de usuario
 export const updateUserProfile = async (userId, profileData) => {
   try {
+    const token = localStorage.getItem('wordzy_token')
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY
+    }
+    
+    // Agregar token de autenticación si existe
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+    
     const response = await fetch(`${API_BASE_URL}/user/${userId}/profile`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY
-      },
+      headers: headers,
       body: JSON.stringify(profileData)
     })
 

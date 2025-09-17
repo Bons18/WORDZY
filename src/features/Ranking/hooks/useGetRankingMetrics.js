@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { getRankingMetrics, getFichasByPrograma, getProgramasByFicha } from "../services/rankingService"
 
-export const useGetRankingMetrics = () => {
+export const useGetRankingMetrics = (year = null, month = null) => {
   const [metrics, setMetrics] = useState({ aprendices: 0, fichas: 0, programas: 0 })
   const [courses, setCourses] = useState([])
   const [students, setStudents] = useState([])
@@ -21,7 +21,7 @@ export const useGetRankingMetrics = () => {
 
       console.log("🚀 useGetRankingMetrics: Starting fetch...")
 
-      const response = await getRankingMetrics()
+      const response = await getRankingMetrics(year, month)
 
       if (response.success) {
         console.log("✅ useGetRankingMetrics: Data received successfully")
@@ -134,7 +134,7 @@ export const useGetRankingMetrics = () => {
 
   useEffect(() => {
     fetchRankingMetrics()
-  }, [])
+  }, [year, month])
 
   return {
     metrics,

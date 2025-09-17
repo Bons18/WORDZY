@@ -5,10 +5,21 @@ const localApiHeaders = {
 }
 
 // Servicio principal para obtener todos los datos desde la API local
-export const getStudentPoints = async () => {
+export const getStudentPoints = async (year = null, month = null) => {
   try {
-    console.log("🔄 Fetching all data from local API...")
-    const response = await fetch(`${LOCAL_API_BASE_URL}/user`, {
+    // Construir query parameters si se proporcionan filtros de fecha
+    const queryParams = new URLSearchParams()
+    if (year) {
+      queryParams.append('year', year)
+    }
+    if (month) {
+      queryParams.append('month', month)
+    }
+    
+    const url = `${LOCAL_API_BASE_URL}/user${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+    console.log("🔄 Fetching all data from local API...", url)
+    
+    const response = await fetch(url, {
       method: "GET",
       headers: localApiHeaders,
     })
@@ -220,9 +231,25 @@ export const getStudentFullName = (student) => {
 
 // Función para obtener fichas del estudiante
 export const getStudentFichas = (student) => {
-  if (student.ficha && Array.isArray(student.ficha)) {
-    return student.ficha
+  if (!student.ficha) {
+    return []
   }
+  
+  // Si es un array, devolverlo directamente
+  if (Array.isArray(student.ficha)) {
+    return student.ficha.filter(f => f && f.toString().trim() !== '')
+  }
+  
+  // Si es un string, convertirlo a array
+  if (typeof student.ficha === 'string' && student.ficha.trim() !== '') {
+    return [student.ficha.trim()]
+  }
+  
+  // Si es un número, convertirlo a string y luego a array
+  if (typeof student.ficha === 'number') {
+    return [student.ficha.toString()]
+  }
+  
   return []
 }
 
@@ -403,11 +430,11 @@ export const getStudentsByPrograma = async (programa) => {
 }
 
 // Servicio para obtener métricas del ranking
-export const getRankingMetrics = async () => {
+export const getRankingMetrics = async (year = null, month = null) => {
   try {
-    console.log("🚀 Starting getRankingMetrics...")
+    console.log("🚀 Starting getRankingMetrics...", { year, month })
 
-    const pointsResponse = await getStudentPoints()
+    const pointsResponse = await getStudentPoints(year, month)
 
     if (!pointsResponse.success) {
       throw new Error("No se pudo conectar a la API local")
@@ -512,7 +539,11 @@ export const generateRealRanking = (students, type = "general", filterValue = nu
   if (type === "ficha" && filterValue) {
     filteredStudents = filteredStudents.filter((student) => {
       const fichas = getStudentFichas(student)
-      return fichas.includes(filterValue.toString())
+      // Comparar tanto como string como número para mayor compatibilidad
+      return fichas.some(ficha => 
+        ficha.toString() === filterValue.toString() || 
+        Number(ficha) === Number(filterValue)
+      )
     })
     console.log(`🎯 Students after ficha filter (${filterValue}): ${filteredStudents.length}`)
   } else if (type === "programa" && filterValue) {

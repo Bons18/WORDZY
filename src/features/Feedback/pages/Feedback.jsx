@@ -33,9 +33,9 @@ const Feedback = () => {
     error: resultsError, 
     total, 
     hasMore,
-    searchResults, 
+    searchFeedbackResults, 
     loadMoreResults,
-    clearResults 
+    resetResults 
   } = useFeedbackResults()
 
   const [searchFilters, setSearchFilters] = useState({
@@ -100,7 +100,7 @@ const Feedback = () => {
   const handleSearch = async (filters) => {
     console.log("🔍 Ejecutando búsqueda con filtros:", filters)
     setSearchFilters(filters)
-    clearResults() // Limpiar resultados anteriores
+    resetResults() // Limpiar resultados anteriores
     
     // Convertir filtros al formato esperado por la API
     const apiFilters = {
@@ -109,7 +109,7 @@ const Feedback = () => {
       instructor: filters.instructor
     }
     
-    await searchResults(apiFilters)
+    await searchFeedbackResults(apiFilters)
   }
 
   const handleLoadMore = () => {

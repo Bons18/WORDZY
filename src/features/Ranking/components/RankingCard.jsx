@@ -147,9 +147,9 @@ const RankingCard = ({ title, icon, color, data, loading, error, filterComponent
 
       {/* Footer con botón Ver más */}
       {data && data.length > 5 && (
-        <div className="mt-3 pt-2 border-t border-gray-100 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-gray-500 truncate">
+        <div className="mt-4 pt-4 px-3 border-t border-gray-100 flex-shrink-0">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-xs text-gray-600 font-medium">
               Mostrando {Math.min(itemsToShow, data.length)} de {data.length}
             </div>
             <button

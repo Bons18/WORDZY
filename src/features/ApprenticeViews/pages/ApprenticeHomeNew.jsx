@@ -118,17 +118,17 @@ const ApprenticeHomeNew = () => {
           {/* Level 1 */}
           <div className="bg-gradient-to-r from-white to-blue-50 border border-blue-200 rounded-lg sm:rounded-xl mb-4 sm:mb-6 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
             <div
-              className="flex justify-between items-center p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 cursor-pointer hover:from-blue-100 hover:to-indigo-100 transition-all duration-300"
+              className="flex justify-between items-center p-6 sm:p-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 cursor-pointer hover:from-blue-100 hover:to-indigo-100 transition-all duration-300"
               onClick={() => toggleSection("nivel1")}
             >
               <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg mr-2 sm:mr-3 group-hover:bg-blue-200 transition-colors">
+                <div className="p-2 bg-blue-100 rounded-lg mr-3 sm:mr-4 group-hover:bg-blue-200 transition-colors">
                   <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-[#1f384c]" />
                 </div>
                 <h3 className="font-bold text-lg sm:text-xl text-gray-800">Nivel 1: Principiante</h3>
               </div>
-              <div className="flex items-center space-x-1 sm:space-x-2">
-                <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs sm:text-sm font-semibold">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <span className="px-3 sm:px-4 py-2 bg-green-100 text-green-700 rounded-full text-xs sm:text-sm font-semibold">
                   65% Completado
                 </span>
                 {expandedSections.nivel1 ? <ChevronUp size={20} className="text-gray-600 sm:hidden" /> : <ChevronDown size={20} className="text-gray-600 sm:hidden" />}
@@ -137,10 +137,10 @@ const ApprenticeHomeNew = () => {
             </div>
 
             {expandedSections.nivel1 && (
-              <div className="p-4 sm:p-6 bg-gradient-to-br from-white to-gray-50">
-                <div className="mb-4 sm:mb-6">
-                  <p className="text-xs sm:text-sm font-bold mb-2 text-gray-700">Progreso nivel</p>
-                  <div className="flex items-center gap-2 sm:gap-3 mb-4">
+              <div className="p-6 sm:p-8 bg-gradient-to-br from-white to-gray-50">
+                <div className="mb-6 sm:mb-8">
+                  <p className="text-sm sm:text-base font-bold mb-3 text-gray-700">Progreso nivel</p>
+                  <div className="flex items-center gap-3 sm:gap-4 mb-6">
                     <div className="flex-1 bg-gray-200 rounded-full h-2 sm:h-3 overflow-hidden">
                       <div className="bg-gradient-to-r from-[#1f384c] to-blue-600 h-2 sm:h-3 rounded-full transition-all duration-500" style={{ width: "65%" }}></div>
                     </div>

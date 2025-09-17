@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useMemo } from "react"
-import { ChevronDown, Globe, FileText, Calendar, Filter } from "lucide-react"
+import { ChevronDown, Globe, FileText, Calendar, Filter, X } from "lucide-react"
 import { useAuth } from "../../auth/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { useGetRankingMetrics } from "../hooks/useGetRankingMetrics"
@@ -43,7 +43,7 @@ const Ranking = () => {
     refetch,
     updateFichasByPrograma,
     updateProgramasByFicha,
-  } = useGetRankingMetrics()
+  } = useGetRankingMetrics(selectedYear, selectedMonth)
 
   // Hooks para obtener estudiantes específicos por ficha y programa
   const { students: studentsByFicha, loading: loadingStudentsByFicha } = useGetStudentsByCourse(selectedFicha)
@@ -103,6 +103,12 @@ const Ranking = () => {
   const handleMonthSelect = (month) => {
     setSelectedMonth(month)
     setIsMonthDropdownOpen(false)
+  }
+
+  // Función para limpiar filtros de fecha
+  const clearDateFilters = () => {
+    setSelectedYear(2025)
+    setSelectedMonth("")
   }
 
   // Función para alternar el menú desplegable de meses
@@ -361,10 +367,20 @@ const Ranking = () => {
             </div>
           </div>
 
+          {/* Botón para limpiar filtros */}
+          <button
+            onClick={clearDateFilters}
+            className="flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded-md border border-gray-300 transition-all duration-200 shadow-sm"
+            title="Limpiar filtros de fecha"
+          >
+            <X className="h-3.5 w-3.5 mr-1.5" />
+            Limpiar
+          </button>
+
           <div className="ml-auto flex items-center">
               <div className="bg-blue-50 px-3 py-1.5 rounded-md text-xs text-[#1f384c] font-medium flex items-center">
                 <Filter className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
-                Periodo: {selectedMonth} {selectedYear}
+                Periodo: {selectedMonth || "Todos"} {selectedYear}
               </div>
             </div>
           </div>

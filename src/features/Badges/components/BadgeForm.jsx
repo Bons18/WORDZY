@@ -11,7 +11,6 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
     name: "",
     points: "",
     description: "",
-    color: "#6b7280",
     file: null,
     filePreview: null,
     fileSize: null,
@@ -85,7 +84,6 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
         name: initialData.name || "",
         points: initialData.points?.toString() || "",
         description: initialData.description || "",
-        color: initialData.color || "#6b7280",
         file: null,
         filePreview: imagePreview,
         fileSize: null,
@@ -207,7 +205,7 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
         {/* Nombre de la insignia */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre de la insignia *
+            Nombre de la insignia * <span className="text-sm text-gray-500">({formData.name.length}/100)</span>
           </label>
           <input
             type="text"
@@ -215,21 +213,22 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
             name="name"
             value={formData.name}
             onChange={handleInputChange}
+            maxLength={100}
             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
+              errors.name || errors.badgeName ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Ingrese el nombre de la insignia"
+            placeholder="Ingrese el nombre de la insignia (mín. 3 caracteres)"
             disabled={isLoading}
           />
-          {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+          {(errors.name || errors.badgeName) && (
+            <p className="mt-1 text-sm text-red-600">{errors.name || errors.badgeName}</p>
           )}
         </div>
 
         {/* Puntos */}
         <div>
           <label htmlFor="points" className="block text-sm font-medium text-gray-700 mb-2">
-            Puntos requeridos *
+            Puntos requeridos * <span className="text-sm text-gray-500">(1 - 100,000)</span>
           </label>
           <input
             type="number"
@@ -238,11 +237,12 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
             value={formData.points}
             onChange={handleInputChange}
             min="1"
+            max="100000"
             step="1"
             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.points ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Ingrese los puntos requeridos"
+            placeholder="Ingrese los puntos requeridos (número entero)"
             disabled={isLoading}
           />
           {errors.points && (
@@ -253,7 +253,7 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
         {/* Descripción */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-            Descripción *
+            Descripción * <span className="text-sm text-gray-500">({formData.description.length}/500, mín. 10)</span>
           </label>
           <textarea
             id="description"
@@ -261,10 +261,12 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
+            minLength={10}
+            maxLength={500}
             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
               errors.description ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Ingrese la descripción de la insignia"
+            placeholder="Ingrese la descripción de la insignia (mínimo 10 caracteres)"
             disabled={isLoading}
           />
           {errors.description && (
@@ -318,27 +320,31 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
         {/* Imagen */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Imagen de la insignia *
+            Imagen de la insignia * <span className="text-sm text-gray-500">(JPG, PNG, SVG, WebP - máx. 5MB)</span>
           </label>
           
           {/* Solo mostrar preview si no estamos editando O si hay un archivo nuevo seleccionado */}
           {(!initialData && !formData.filePreview) || (initialData && !formData.file) ? (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+            <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-gray-400 transition-colors ${
+              errors.file ? 'border-red-300 bg-red-50' : 'border-gray-300'
+            }`}>
               <input
                 type="file"
                 id="file"
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/svg+xml,image/webp"
                 onChange={handleFileChange}
                 className="hidden"
                 disabled={isLoading}
               />
               <label htmlFor="file" className="cursor-pointer">
-                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <Upload className={`mx-auto h-12 w-12 mb-4 ${
+                  errors.file ? 'text-red-400' : 'text-gray-400'
+                }`} />
                 <p className="text-sm text-gray-600 mb-2">
                   {initialData ? "Haz clic para cambiar la imagen" : "Haz clic para subir una imagen o arrastra y suelta"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  PNG, JPG, GIF, WebP hasta 5MB
+                  Formatos: JPG, PNG, SVG, WebP | Tamaño máximo: 5MB
                 </p>
               </label>
             </div>
@@ -365,6 +371,33 @@ const BadgeForm = ({ onSubmit, onCancel, initialData = null, isLoading = false }
                 )}
               </div>
             )
+          )}
+          
+          {/* Mostrar imagen existente si estamos editando */}
+          {initialData && formData.filePreview && !formData.file && (
+            <div className="relative inline-block">
+              <img
+                src={formData.filePreview}
+                alt="Imagen actual"
+                className="w-32 h-32 object-contain rounded-lg border border-gray-300 bg-white"
+              />
+              <div className="mt-2">
+                <input
+                  type="file"
+                  id="file-edit"
+                  accept="image/jpeg,image/jpg,image/png,image/svg+xml,image/webp"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="file-edit"
+                  className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                >
+                  Cambiar imagen
+                </label>
+              </div>
+            </div>
           )}
           
           {errors.file && (

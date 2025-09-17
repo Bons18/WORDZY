@@ -108,16 +108,14 @@ const BadgeTable = ({
               }}
             />
             <div
-              className="w-full h-full rounded-full hidden items-center justify-center text-white text-lg font-bold"
-              style={{ backgroundColor: badge.color || "#6b7280" }}
+              className="w-full h-full rounded-full hidden items-center justify-center text-white text-lg font-bold bg-gray-500"
             >
               {(badge.name || badge.badgeName)?.charAt(0) || "?"}
             </div>
           </div>
         ) : (
           <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-bold border-3 border-gray-300 shadow-lg"
-            style={{ backgroundColor: badge.color || "#6b7280" }}
+            className="w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-bold border-3 border-gray-300 shadow-lg bg-gray-500"
           >
             {(badge.name || badge.badgeName)?.charAt(0) || "?"}
           </div>
@@ -138,13 +136,13 @@ const BadgeTable = ({
         <th className="px-4 py-4 text-center text-sm font-semibold text-gray-700 w-24">
           Puntos
         </th>
-        <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700">
+        <th className="px-4 py-4 text-left text-sm font-semibold text-gray-700 w-80">
           Descripción
         </th>
-        <th className="px-4 py-4 text-center text-sm font-semibold text-gray-700 w-32">
+        <th className="px-4 py-4 text-center text-sm font-semibold text-gray-700 w-28">
           Fecha Inicio
         </th>
-        <th className="px-4 py-4 text-center text-sm font-semibold text-gray-700 w-32">
+        <th className="px-4 py-4 text-center text-sm font-semibold text-gray-700 w-28">
           Fecha Fin
         </th>
         {(showActions.show || showActions.edit || showActions.delete) && (
@@ -187,7 +185,7 @@ const BadgeTable = ({
               </span>
             </td>
             <td className="px-4 py-4 text-left">
-              <div className="text-sm text-gray-600 max-w-xs truncate" title={badge.description}>
+              <div className="text-sm text-gray-600 max-w-md break-words max-h-20 overflow-y-auto" title={badge.description}>
                 {badge.description || "Sin descripción"}
               </div>
             </td>
@@ -275,15 +273,15 @@ const BadgeTable = ({
     if (!showPagination) return null
 
     return (
-      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
-        <div className="text-sm text-gray-600">
+      <div className="flex justify-between items-center mt-6 pt-6 px-6 pb-4 border-t border-gray-200">
+        <div className="text-sm text-gray-600 font-medium">
           Mostrando {currentData.length} de {filteredData.length} insignias
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600 font-medium">
             Página {currentPage} de {Math.max(1, totalPages)}
           </span>
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
