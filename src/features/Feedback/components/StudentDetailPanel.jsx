@@ -1,33 +1,42 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, User, Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react"
+import { X, User, Clock, CheckCircle, XCircle, AlertTriangle, HelpCircle } from "lucide-react"
 import { useStudentDetails } from "../hooks/useStudentDetails"
+import EnhancedQuestionCard from "./EnhancedQuestionCard"
+import FeedbackSummaryCard from "./FeedbackSummaryCard"
+import InteractiveFeedbackPanel from "./InteractiveFeedbackPanel"
 
 const StudentDetailPanel = ({ isOpen, onClose, selectedStudent, feedbackItem }) => {
-  const { loadFailedQuestions } = useStudentDetails()
-  const [failedQuestions, setFailedQuestions] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const { failedQuestions, loading, error, loadStudentData, loadFailedQuestions } = useStudentDetails()
+  const [showAIFeedback, setShowAIFeedback] = useState(false)
+  const [selectedQuestion, setSelectedQuestion] = useState(null)
+  const [viewMode, setViewMode] = useState("summary") // summary, list, detail
 
   useEffect(() => {
     if (isOpen && selectedStudent && feedbackItem) {
-      loadQuestions()
+      console.log("🔍 Cargando datos del estudiante:", selectedStudent.nombre)
+      loadStudentData(selectedStudent, feedbackItem.id)
+      loadFailedQuestions(selectedStudent.id, feedbackItem.id)
     }
-  }, [isOpen, selectedStudent, feedbackItem])
+  }, [isOpen, selectedStudent, feedbackItem, loadStudentData, loadFailedQuestions])
 
-  const loadQuestions = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const questions = await loadFailedQuestions(selectedStudent.id, feedbackItem.id)
-      setFailedQuestions(questions)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+  const handleCheckFeedback = () => {
+    setShowAIFeedback(!showAIFeedback)
+  }
+
+  const loadQuestions = () => {
+    if (selectedStudent && feedbackItem) {
+      loadFailedQuestions(selectedStudent.id, feedbackItem.id)
     }
   }
+
+  const handleQuestionSelect = (question) => {
+    setSelectedQuestion(question)
+    setViewMode("detail")
+  }
+
+  const totalQuestions = 15 // Esto debería venir de los datos reales
 
   if (!isOpen) return null
 
@@ -138,9 +147,17 @@ const StudentDetailPanel = ({ isOpen, onClose, selectedStudent, feedbackItem }) 
           {selectedStudent?.estado === "Presente" && selectedStudent?.preguntasFalladas > 0 && (
             <div className="bg-white border border-gray-200 rounded-lg">
               <div className="px-4 py-3 border-b border-gray-200 bg-red-50">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-red-500" />
-                  <h3 className="text-lg font-medium text-red-800">Preguntas Falladas ({failedQuestions.length})</h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                    <h3 className="text-lg font-medium text-red-800">Preguntas Falladas ({failedQuestions.length})</h3>
+                  </div>
+                  <button
+                    onClick={handleCheckFeedback}
+                    className="px-3 py-1 bg-[#1f384c] text-white text-sm rounded-md hover:bg-[#2a4a5f] transition-colors"
+                  >
+                    Comprobar Retroalimentación con IA
+                  </button>
                 </div>
               </div>
 
@@ -192,6 +209,40 @@ const StudentDetailPanel = ({ isOpen, onClose, selectedStudent, feedbackItem }) 
                             <div>
                               <span className="font-medium text-gray-700">Observación:</span>
                               <p className="text-gray-600 mt-1">{question.observacion}</p>
+                            </div>
+                          )}
+                          
+                          {showAIFeedback && question.feedback && (
+                            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                              <div className="flex items-start">
+                                <div className="flex-shrink-0">
+                                  <HelpCircle className="h-5 w-5 text-blue-500" />
+                                </div>
+                                <div className="ml-3">
+                                  <h3 className="text-sm font-medium text-blue-800">Retroalimentación de IA</h3>
+                                  <div className="mt-2 text-sm text-blue-700">
+                                    <p className="mb-2">{question.feedback}</p>
+                                    
+                                    {question.explanation && (
+                                      <div className="mt-3">
+                                        <p className="font-medium">Explicación:</p>
+                                        <p>{question.explanation}</p>
+                                      </div>
+                                    )}
+                                    
+                                    {question.suggestions && question.suggestions.length > 0 && (
+                                      <div className="mt-3">
+                                        <p className="font-medium">Sugerencias:</p>
+                                        <ul className="list-disc pl-5 space-y-1">
+                                          {question.suggestions.map((suggestion, index) => (
+                                            <li key={index}>{suggestion}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>

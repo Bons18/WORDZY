@@ -2,9 +2,10 @@
 
 import React from "react"
 import { useState, useEffect, useRef } from "react"
-import { ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, X } from "lucide-react"
+import { ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, X, RefreshCw } from "lucide-react"
 import ConfirmationModal from "../../../shared/components/ConfirmationModal"
 import { useNavigate } from "react-router-dom"
+import enhancedAiService from "../../Feedback/services/enhancedAiService"
 
 const ExamModal = ({ isOpen, onClose, exam }) => {
   const navigate = useNavigate()
@@ -16,6 +17,8 @@ const ExamModal = ({ isOpen, onClose, exam }) => {
   const [nextBlankIndex, setNextBlankIndex] = useState(0)
   const audioRef = useRef(null)
   const [audioProgress, setAudioProgress] = useState(0)
+  const [isEvaluatingWithAI, setIsEvaluatingWithAI] = useState(false)
+  const [aiEvaluation, setAiEvaluation] = useState(null)
 
   // Inicializar respuestas del usuario
   useEffect(() => {
@@ -110,8 +113,45 @@ const ExamModal = ({ isOpen, onClose, exam }) => {
     }
   }
 
-  const finishExam = () => {
-    setShowResults(true)
+  const finishExam = async () => {
+    setIsEvaluatingWithAI(true)
+    
+    try {
+      // Preparar datos del examen para evaluación automática
+      const examData = {
+        examId: exam.id,
+        examName: exam.title,
+        studentId: "current_student", // En un caso real, esto vendría del contexto de usuario
+        questions: exam.questions.map((question, index) => ({
+          id: question.id,
+          question: question.text,
+          type: question.type === "completion" ? "text" : "multiple_choice",
+          options: question.options,
+          correctAnswer: question.correctAnswer,
+          studentAnswer: userAnswers[index],
+          context: question.context || "",
+          maxScore: question.points
+        }))
+      }
+      
+      // Evaluar automáticamente con IA
+      const evaluation = await enhancedAiService.evaluateExamAutomatically(examData)
+      
+      if (evaluation.success) {
+        setAiEvaluation(evaluation.data)
+        console.log("✅ Evaluación automática completada:", evaluation.data)
+      } else {
+        console.warn("⚠️ Evaluación automática falló, usando datos básicos:", evaluation.fallbackData)
+        setAiEvaluation(evaluation.fallbackData)
+      }
+      
+    } catch (error) {
+      console.error("❌ Error en evaluación automática:", error)
+      setAiEvaluation(null)
+    } finally {
+      setIsEvaluatingWithAI(false)
+      setShowResults(true)
+    }
   }
 
   const calculateScore = () => {
@@ -532,12 +572,62 @@ const ExamModal = ({ isOpen, onClose, exam }) => {
     const { totalScore, maxScore } = calculateScore()
     const passed = totalScore >= maxScore * 0.7 // 70% para aprobar
 
+    // Mostrar indicador de carga mientras se evalúa con IA
+    if (isEvaluatingWithAI) {
+      return (
+        <div className="p-6 max-w-md mx-auto text-center">
+          <div className="flex items-center justify-center mb-4">
+            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mr-3" />
+            <h2 className="text-xl font-bold">Evaluando con IA...</h2>
+          </div>
+          <p className="text-gray-600 mb-4">
+            Estamos analizando tus respuestas automáticamente para brindarte retroalimentación personalizada.
+          </p>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '70%' }}></div>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="p-6 max-w-md mx-auto">
         <h2 className="text-xl font-bold text-center mb-6">Resultados</h2>
 
+        {/* Mostrar información de evaluación automática si está disponible */}
+        {aiEvaluation && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center mb-2">
+              <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <h3 className="font-semibold text-blue-800">Evaluación Automática Completada</h3>
+            </div>
+            <div className="text-sm text-blue-700">
+              <p><strong>Precisión:</strong> {aiEvaluation.stats?.accuracy?.toFixed(1)}%</p>
+              <p><strong>Nivel de rendimiento:</strong> {aiEvaluation.stats?.performanceLevel}</p>
+              {aiEvaluation.recommendations && aiEvaluation.recommendations.recommendations && (
+                <div className="mt-2">
+                  <p className="font-medium">Recomendaciones:</p>
+                  <ul className="list-disc list-inside mt-1">
+                    {aiEvaluation.recommendations.recommendations.slice(0, 2).map((rec, index) => (
+                      <li key={index} className="text-xs">{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {exam.questions.map((question, index) => {
           let isCorrect = false
+          let aiQuestionEvaluation = null
+
+          // Buscar evaluación de IA para esta pregunta
+          if (aiEvaluation && aiEvaluation.evaluatedQuestions) {
+            aiQuestionEvaluation = aiEvaluation.evaluatedQuestions.find(q => q.id === question.id)
+          }
 
           if (question.type === "completion") {
             const userCompletionAnswers = userAnswers[index] || []
@@ -548,15 +638,29 @@ const ExamModal = ({ isOpen, onClose, exam }) => {
             isCorrect = userAnswers[index] === question.correctAnswer
           }
 
+          // Usar evaluación de IA si está disponible
+          if (aiQuestionEvaluation && aiQuestionEvaluation.evaluation) {
+            isCorrect = aiQuestionEvaluation.evaluation.isCorrect
+          }
+
           return (
-            <div key={index} className="mb-2 flex items-center">
-              <span className="mr-2">
-                Pregunta {index + 1}: {question.points} puntos
-              </span>
-              {isCorrect ? (
-                <CheckCircle size={18} className="text-green-600" />
-              ) : (
-                <X className="w-4 h-4 text-red-600" />
+            <div key={index} className="mb-3 p-3 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">
+                  Pregunta {index + 1}: {question.points} puntos
+                </span>
+                {isCorrect ? (
+                  <CheckCircle size={18} className="text-green-600" />
+                ) : (
+                  <X className="w-4 h-4 text-red-600" />
+                )}
+              </div>
+              
+              {/* Mostrar feedback de IA si está disponible */}
+              {aiQuestionEvaluation && aiQuestionEvaluation.evaluation && aiQuestionEvaluation.evaluation.feedback && (
+                <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded mt-2">
+                  <strong>IA:</strong> {aiQuestionEvaluation.evaluation.feedback}
+                </div>
               )}
             </div>
           )

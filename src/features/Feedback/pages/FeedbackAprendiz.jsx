@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronUp, Lock } from "lucide-react"
-import { useLocation } from "react-router-dom"
+import { ChevronDown, ChevronUp, Lock, ArrowLeft, Unlock } from "lucide-react"
+import { useLocation, useNavigate } from "react-router-dom"
 
 export default function ApprenticeFeedbackView() {
   const [expandedLevels, setExpandedLevels] = useState({ 1: true })
@@ -10,6 +10,7 @@ export default function ApprenticeFeedbackView() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState(null)
   const location = useLocation()
+  const navigate = useNavigate()
 
   // Check if we should open a specific activity detail on load
   useEffect(() => {
@@ -145,269 +146,257 @@ export default function ApprenticeFeedbackView() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Main Content */}
-      <main className="container mx-auto py-8 px-4 max-w-5xl">
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          {/* Page Header */}
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-[#1f384c]">Mi Retroalimentación</h2>
-            <p className="text-gray-600 mt-1">Revisa tu progreso en las actividades y evaluaciones</p>
-          </div>
-
-          {/* Levels */}
-          <div className="p-6">
-            {/* Level 1 - Expanded */}
-            <div className="mb-6 border border-gray-200 rounded-lg overflow-hidden">
-              <div
-                className="flex justify-between items-center p-4 bg-gray-50 cursor-pointer"
-                onClick={() => toggleLevel(1)}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4 sm:py-6">
+            <div className="flex items-center">
+              <button
+                onClick={() => navigate(-1)}
+                className="mr-3 sm:mr-4 p-1 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                <h3 className="font-medium text-lg">Nivel 1</h3>
-                <div className="flex items-center">
-                  <div className="mr-3 font-medium">95%</div>
-                  {expandedLevels[1] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </div>
+                <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
+              </button>
+              <div>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1f384c]">
+                  Retroalimentación del Aprendiz
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 mt-1">
+                  Revisa tu progreso y retroalimentación detallada
+                </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-              {expandedLevels[1] && (
-                <div className="p-6">
-                  <div className="mb-6">
-                    <div className="flex justify-between mb-2">
-                      <span>Progreso nivel</span>
-                      <span>95%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div className="bg-green-500 h-2.5 rounded-full" style={{ width: "95%" }}></div>
-                    </div>
-                  </div>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="space-y-4 sm:space-y-6">
+          {/* Level 1 - Unlocked */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+            <div 
+              className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-6 bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+              onClick={() => setExpandedLevels(prev => ({ ...prev, 1: !prev[1] }))}
+            >
+              <div className="flex items-center mb-2 sm:mb-0">
+                <Unlock size={18} className="mr-2 sm:mr-3 text-green-600 flex-shrink-0" />
+                <h3 className="font-medium text-lg sm:text-xl">Nivel 1: Vocabulary</h3>
+              </div>
+              <div className="flex items-center justify-between sm:justify-end">
+                <span className="text-sm sm:text-base text-gray-600 mr-2 sm:mr-4">
+                  Progreso: 75%
+                </span>
+                {expandedLevels[1] ? (
+                  <ChevronUp size={20} className="text-gray-400" />
+                ) : (
+                  <ChevronDown size={20} className="text-gray-400" />
+                )}
+              </div>
+            </div>
 
-                  {/* Temas section */}
-                  <div>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <div
-                        className="flex justify-between items-center p-4 bg-gray-50 cursor-pointer"
-                        onClick={() => toggleTopic("temas")}
-                      >
-                        <h4 className="font-medium text-lg">Temas</h4>
-                        <div>{expandedTopics["temas"] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</div>
-                      </div>
-
-                      {expandedTopics["temas"] && (
-                        <div className="p-4">
-                          {/* Topic 1 - Greetings */}
-                          <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">
-                            <div
-                              className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50"
-                              onClick={() => toggleTopic("greetings")}
-                            >
-                              <h4 className="font-medium">Greetings & Introductions</h4>
-                              <div className="flex items-center">
-                                <div className="mr-3 font-medium">100%</div>
-                                {expandedTopics["greetings"] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            {expandedLevels[1] && (
+              <div className="border-t border-gray-200 bg-gray-50">
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    {/* Activities Section */}
+                    <div>
+                      <h4 className="font-medium text-base sm:text-lg mb-3 sm:mb-4 text-[#1f384c]">
+                        Actividades
+                      </h4>
+                      <div className="space-y-3 sm:space-y-4">
+                        {/* Activity 1 */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                            <div className="flex-1 mb-2 sm:mb-0">
+                              <div className="font-medium text-sm sm:text-base">Colors and Numbers</div>
+                              <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                                Calificación: 85%
                               </div>
                             </div>
-
-                            {expandedTopics["greetings"] && (
-                              <div className="p-4 border-t border-gray-200">
-                                <div className="mb-4">
-                                  <div className="flex justify-between mb-2">
-                                    <span>Progreso</span>
-                                    <span>100%</span>
-                                  </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div className="bg-green-500 h-2.5 rounded-full" style={{ width: "100%" }}></div>
-                                  </div>
-                                </div>
-
-                                {/* Activities */}
-                                <div className="mt-6">
-                                  <div className="font-medium mb-3">Actividades:</div>
-
-                                  <div className="space-y-3">
-                                    {greetingsActivities.map((activity) => (
-                                      <div key={activity.id} className="border border-gray-200 rounded-lg p-3">
-                                        <div className="flex items-start">
-                                          <input
-                                            type="checkbox"
-                                            checked={activity.completed}
-                                            readOnly
-                                            className="mt-1 mr-3"
-                                          />
-                                          <div className="flex-1">
-                                            <div className="font-medium">{activity.name}</div>
-                                            {activity.description && (
-                                              <div className="text-sm text-gray-500 mt-1">{activity.description}</div>
-                                            )}
-                                          </div>
-                                          <button
-                                            className="ml-2 px-3 py-1 bg-[#1f384c] text-white text-sm rounded hover:bg-opacity-90"
-                                            onClick={() => handleViewDetail(activity)}
-                                          >
-                                            Ver Detalle
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Exams */}
-                                <div className="mt-6">
-                                  <div className="font-medium mb-3">Examen:</div>
-
-                                  <div className="border border-gray-200 rounded-lg p-3">
-                                    <div className="flex items-start">
-                                      <input type="checkbox" checked={true} readOnly className="mt-1 mr-3" />
-                                      <div className="flex-1">
-                                        <div className="font-medium">Greeting</div>
-                                      </div>
-                                      <button
-                                        className="ml-2 px-3 py-1 bg-[#1f384c] text-white text-sm rounded hover:bg-opacity-90"
-                                        onClick={() =>
-                                          handleViewDetail({
-                                            id: "exam-1",
-                                            name: "Greeting",
-                                            type: "Examen",
-                                            score: 95,
-                                            feedback: "Excelente dominio de los saludos y presentaciones.",
-                                          })
-                                        }
-                                      >
-                                        Ver Detalle
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Topic 2 - Simple Present */}
-                          <div className="border border-gray-200 rounded-lg overflow-hidden">
-                            <div
-                              className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50"
-                              onClick={() => toggleTopic("simple-present")}
+                            <button
+                              className="w-full sm:w-auto px-3 py-2 bg-[#1f384c] text-white text-xs sm:text-sm rounded hover:bg-opacity-90 transition-colors"
+                              onClick={() =>
+                                handleViewDetail({
+                                  id: "activity-1",
+                                  name: "Colors and Numbers",
+                                  type: "Actividad",
+                                  level: 1,
+                                  topic: "Vocabulary",
+                                  score: 85,
+                                  feedback: "Excelente trabajo en vocabulario básico",
+                                  questions: [
+                                    {
+                                      id: 1,
+                                      text: "What color is the sky?",
+                                      options: ["Blue", "Red", "Green", "Yellow"],
+                                      correctAnswer: 0,
+                                      userAnswer: 0,
+                                      feedback: "Correcto! El cielo es azul.",
+                                      score: 10,
+                                    },
+                                    {
+                                      id: 2,
+                                      text: "How many fingers do you have?",
+                                      options: ["Eight", "Nine", "Ten", "Eleven"],
+                                      correctAnswer: 2,
+                                      userAnswer: 1,
+                                      feedback: "Incorrecto. Los humanos tienen diez dedos.",
+                                      score: 0,
+                                    },
+                                  ],
+                                })
+                              }
                             >
-                              <h4 className="font-medium">Simple Present</h4>
-                              <div className="flex items-center">
-                                <div className="mr-3 font-medium">60%</div>
-                                {expandedTopics["simple-present"] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                              </div>
-                            </div>
-
-                            {expandedTopics["simple-present"] && (
-                              <div className="p-4 border-t border-gray-200">
-                                <div className="mb-4">
-                                  <div className="flex justify-between mb-2">
-                                    <span>Progreso</span>
-                                    <span>60%</span>
-                                  </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div className="bg-green-500 h-2.5 rounded-full" style={{ width: "60%" }}></div>
-                                  </div>
-                                </div>
-
-                                {/* Activities */}
-                                <div className="mt-6">
-                                  <div className="font-medium mb-3">Actividades:</div>
-
-                                  <div className="space-y-3">
-                                    {simplePresentActivities.map((activity) => (
-                                      <div key={activity.id} className="border border-gray-200 rounded-lg p-3">
-                                        <div className="flex items-start">
-                                          <input
-                                            type="checkbox"
-                                            checked={activity.completed}
-                                            readOnly
-                                            className="mt-1 mr-3"
-                                          />
-                                          <div className="flex-1">
-                                            <div className="font-medium">{activity.name}</div>
-                                            {activity.description && (
-                                              <div className="text-sm text-gray-500 mt-1">{activity.description}</div>
-                                            )}
-                                          </div>
-                                          <button
-                                            className="ml-2 px-3 py-1 bg-[#1f384c] text-white text-sm rounded hover:bg-opacity-90"
-                                            onClick={() => handleViewDetail(activity)}
-                                          >
-                                            Ver Detalle
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Exams */}
-                                <div className="mt-6">
-                                  <div className="font-medium mb-3">Examen:</div>
-
-                                  <div className="border border-gray-200 rounded-lg p-3">
-                                    <div className="flex items-start">
-                                      <input type="checkbox" checked={false} readOnly className="mt-1 mr-3" />
-                                      <div className="flex-1">
-                                        <div className="font-medium">Simple Present</div>
-                                      </div>
-                                      <button
-                                        className="ml-2 px-3 py-1 bg-[#1f384c] text-white text-sm rounded hover:bg-opacity-90"
-                                        onClick={() =>
-                                          handleViewDetail({
-                                            id: "exam-2",
-                                            name: "Simple Present",
-                                            type: "Examen",
-                                            score: 0,
-                                            feedback: "Pendiente de realizar",
-                                          })
-                                        }
-                                      >
-                                        Ver Detalle
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
+                              Ver Detalle
+                            </button>
                           </div>
                         </div>
-                      )}
+
+                        {/* Activity 2 */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                            <div className="flex-1 mb-2 sm:mb-0">
+                              <div className="font-medium text-sm sm:text-base">Family Members</div>
+                              <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                                Calificación: 92%
+                              </div>
+                            </div>
+                            <button
+                              className="w-full sm:w-auto px-3 py-2 bg-[#1f384c] text-white text-xs sm:text-sm rounded hover:bg-opacity-90 transition-colors"
+                              onClick={() =>
+                                handleViewDetail({
+                                  id: "activity-2",
+                                  name: "Family Members",
+                                  type: "Actividad",
+                                  level: 1,
+                                  topic: "Vocabulary",
+                                  score: 92,
+                                  feedback: "Muy buen dominio del vocabulario familiar",
+                                  questions: [
+                                    {
+                                      id: 1,
+                                      text: "What do you call your father's brother?",
+                                      options: ["Cousin", "Uncle", "Nephew", "Grandfather"],
+                                      correctAnswer: 1,
+                                      userAnswer: 1,
+                                      feedback: "Correcto! Uncle es el hermano del padre.",
+                                      score: 10,
+                                    },
+                                  ],
+                                })
+                              }
+                            >
+                              Ver Detalle
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Exams Section */}
+                    <div>
+                      <h4 className="font-medium text-base sm:text-lg mb-3 sm:mb-4 text-[#1f384c]">
+                        Exámenes
+                      </h4>
+                      <div className="space-y-3 sm:space-y-4">
+                        {/* Exam 1 */}
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                            <div className="flex-1 mb-2 sm:mb-0">
+                              <div className="font-medium text-sm sm:text-base">Vocabulary Test</div>
+                              <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                                Calificación: 78%
+                              </div>
+                            </div>
+                            <button
+                              className="w-full sm:w-auto px-3 py-2 bg-[#1f384c] text-white text-xs sm:text-sm rounded hover:bg-opacity-90 transition-colors"
+                              onClick={() =>
+                                handleViewDetail({
+                                  id: "exam-1",
+                                  name: "Vocabulary Test",
+                                  type: "Examen",
+                                  level: 1,
+                                  topic: "Vocabulary",
+                                  score: 78,
+                                  feedback: "Buen desempeño general, revisar algunos conceptos",
+                                })
+                              }
+                            >
+                              Ver Detalle
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Exam 2 - Pending */}
+                        <div className="bg-gray-100 border border-gray-200 rounded-lg p-3 sm:p-4">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                            <div className="flex-1 mb-2 sm:mb-0">
+                              <div className="font-medium text-sm sm:text-base">Simple Present</div>
+                              <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                                Pendiente de realizar
+                              </div>
+                            </div>
+                            <button
+                              className="w-full sm:w-auto px-3 py-2 bg-[#1f384c] text-white text-xs sm:text-sm rounded hover:bg-opacity-90 transition-colors"
+                              onClick={() =>
+                                handleViewDetail({
+                                  id: "exam-2",
+                                  name: "Simple Present",
+                                  type: "Examen",
+                                  score: 0,
+                                  feedback: "Pendiente de realizar",
+                                })
+                              }
+                            >
+                              Ver Detalle
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
 
-            {/* Level 2 - Locked */}
-            <div className="mb-6 border border-gray-200 rounded-lg overflow-hidden">
-              <div className="flex justify-between items-center p-4 bg-gray-50">
-                <div className="flex items-center">
-                  <Lock size={18} className="mr-2" />
-                  <h3 className="font-medium text-lg">Nivel 2: Conjugations</h3>
-                </div>
-                <div>El nivel se habilitará al terminar el correspondiente</div>
+          {/* Level 2 - Locked */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-6 bg-gray-50">
+              <div className="flex items-center mb-2 sm:mb-0">
+                <Lock size={18} className="mr-2 sm:mr-3 text-gray-400 flex-shrink-0" />
+                <h3 className="font-medium text-lg sm:text-xl text-gray-600">Nivel 2: Conjugations</h3>
+              </div>
+              <div className="text-xs sm:text-sm text-gray-500">
+                El nivel se habilitará al terminar el correspondiente
               </div>
             </div>
+          </div>
 
-            {/* Level 3 - Locked */}
-            <div className="mb-6 border border-gray-200 rounded-lg overflow-hidden">
-              <div className="flex justify-between items-center p-4 bg-gray-50">
-                <div className="flex items-center">
-                  <Lock size={18} className="mr-2" />
-                  <h3 className="font-medium text-lg">Nivel 3: Writing</h3>
-                </div>
-                <div>El nivel se habilitará al terminar el correspondiente</div>
+          {/* Level 3 - Locked */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-6 bg-gray-50">
+              <div className="flex items-center mb-2 sm:mb-0">
+                <Lock size={18} className="mr-2 sm:mr-3 text-gray-400 flex-shrink-0" />
+                <h3 className="font-medium text-lg sm:text-xl text-gray-600">Nivel 3: Writing</h3>
+              </div>
+              <div className="text-xs sm:text-sm text-gray-500">
+                El nivel se habilitará al terminar el correspondiente
               </div>
             </div>
+          </div>
 
-            {/* Level 4 - Locked */}
-            <div className="mb-6 border border-gray-200 rounded-lg overflow-hidden">
-              <div className="flex justify-between items-center p-4 bg-gray-50">
-                <div className="flex items-center">
-                  <Lock size={18} className="mr-2" />
-                  <h3 className="font-medium text-lg">Nivel 4: Listening</h3>
-                </div>
-                <div>El nivel se habilitará al terminar el correspondiente</div>
+          {/* Level 4 - Locked */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-6 bg-gray-50">
+              <div className="flex items-center mb-2 sm:mb-0">
+                <Lock size={18} className="mr-2 sm:mr-3 text-gray-400 flex-shrink-0" />
+                <h3 className="font-medium text-lg sm:text-xl text-gray-600">Nivel 4: Listening</h3>
+              </div>
+              <div className="text-xs sm:text-sm text-gray-500">
+                El nivel se habilitará al terminar el correspondiente
               </div>
             </div>
           </div>
@@ -417,20 +406,22 @@ export default function ApprenticeFeedbackView() {
       {/* Activity Detail Modal */}
       {showDetailModal && selectedActivity && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-[#1f384c]">Detalle de Retroalimentación</h3>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-4 sm:p-6 border-b border-gray-200">
+              <h3 className="text-lg sm:text-xl font-bold text-[#1f384c]">
+                Detalle de Retroalimentación
+              </h3>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-grow">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-grow">
               {/* Información del nivel y tema */}
-              <div className="mb-4">
-                <p className="font-medium">Nivel {selectedActivity.level}</p>
-                <p className="text-gray-600">Tema: {selectedActivity.topic}</p>
+              <div className="mb-4 sm:mb-6">
+                <p className="font-medium text-sm sm:text-base">Nivel {selectedActivity.level}</p>
+                <p className="text-gray-600 text-sm sm:text-base">Tema: {selectedActivity.topic}</p>
               </div>
 
               {/* Barra de progreso */}
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 <div className="text-sm font-medium mb-1">Calificación</div>
                 <div className="relative pt-1">
                   <div className="flex mb-2 items-center justify-between">
@@ -451,36 +442,40 @@ export default function ApprenticeFeedbackView() {
               </div>
 
               {/* Nombre de la actividad */}
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 <div className="text-sm font-medium mb-1">Nombre de la Actividad</div>
-                <div className="p-3 border border-gray-200 rounded bg-gray-50">{selectedActivity.name}</div>
+                <div className="p-3 border border-gray-200 rounded bg-gray-50 text-sm sm:text-base">
+                  {selectedActivity.name}
+                </div>
               </div>
 
               {/* Preguntas y respuestas */}
               {selectedActivity.questions &&
                 selectedActivity.questions.map((question, index) => (
-                  <div key={question.id} className="mb-8 border-b border-gray-200 pb-6 last:border-b-0">
+                  <div key={question.id} className="mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6 last:border-b-0">
                     <div className="mb-4">
-                      <div className="text-base font-medium mb-3">{question.text}</div>
-                      <div className="space-y-3">
+                      <div className="text-sm sm:text-base font-medium mb-3">{question.text}</div>
+                      <div className="space-y-2 sm:space-y-3">
                         {question.options.map((option, optIndex) => (
-                          <div key={optIndex} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3 flex-1">
+                          <div key={optIndex} className="flex items-center justify-between gap-2 sm:gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                               <input
                                 type="radio"
                                 checked={optIndex === question.userAnswer}
                                 readOnly
-                                className="h-4 w-4"
+                                className="h-4 w-4 flex-shrink-0"
                               />
-                              <div className="border border-gray-200 rounded p-3 flex-1 bg-white">{option}</div>
+                              <div className="border border-gray-200 rounded p-2 sm:p-3 flex-1 bg-white text-sm sm:text-base break-words">
+                                {option}
+                              </div>
                             </div>
-                            <div className="ml-3">
+                            <div className="flex-shrink-0">
                               {optIndex === question.correctAnswer ? (
-                                <span className="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-800 rounded-md">
+                                <span className="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-800 rounded-md text-sm">
                                   ✓
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center justify-center w-6 h-6 bg-red-100 text-red-800 rounded-md">
+                                <span className="inline-flex items-center justify-center w-6 h-6 bg-red-100 text-red-800 rounded-md text-sm">
                                   ✗
                                 </span>
                               )}
@@ -493,20 +488,22 @@ export default function ApprenticeFeedbackView() {
                     {/* Retroalimentación */}
                     <div className="mt-4">
                       <div className="text-sm font-medium mb-2">Retroalimentación</div>
-                      <div className="p-3 bg-gray-50 border border-gray-200 rounded text-sm">{question.feedback}</div>
+                      <div className="p-3 bg-gray-50 border border-gray-200 rounded text-xs sm:text-sm">
+                        {question.feedback}
+                      </div>
                     </div>
 
                     {/* Puntaje */}
                     <div className="flex justify-end mt-3">
-                      <span className="text-sm font-medium">Puntos: {question.score}</span>
+                      <span className="text-xs sm:text-sm font-medium">Puntos: {question.score}</span>
                     </div>
                   </div>
                 ))}
             </div>
 
-            <div className="p-4 border-t border-gray-200 flex justify-end">
+            <div className="p-4 sm:p-6 border-t border-gray-200 flex justify-end">
               <button
-                className="px-6 py-2 bg-[#1f384c] text-white rounded hover:bg-opacity-90 transition-colors"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-[#1f384c] text-white rounded hover:bg-opacity-90 transition-colors text-sm sm:text-base"
                 onClick={() => setShowDetailModal(false)}
               >
                 Cerrar

@@ -1156,7 +1156,7 @@ const Ranking = () => {
               disabled={currentPage === 1}
               className={`p-2 rounded-md ${currentPage === 1 ? "text-gray-400" : "text-[#1f384c] hover:bg-gray-100"}`}
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
 
             <div className="flex mx-2">
@@ -1184,7 +1184,7 @@ const Ranking = () => {
                 currentPage === totalPages ? "text-gray-400" : "text-[#1f384c] hover:bg-gray-100"
               }`}
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}

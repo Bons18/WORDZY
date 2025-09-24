@@ -36,17 +36,17 @@ const Badges = () => {
   }
 
   return (
-    <div className="max-h-screen">
+    <div className="min-h-screen bg-white">
       <BadgeHeader title="Crear Insignia" />
 
-      <div className="container mx-auto px-6">
-        {/* Alerta de éxito */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl">
+        {/* Alerta de éxito - Responsive */}
         {showSuccessAlert && (
-          <div className="mb-4 p-4 bg-green-100 border border-green-300 text-green-700 rounded-lg flex justify-between items-center">
-            <span>{successMessage}</span>
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-100 border border-green-300 text-green-700 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+            <span className="text-sm sm:text-base">{successMessage}</span>
             <button
               onClick={() => setShowSuccessAlert(false)}
-              className="text-green-700 hover:text-green-900"
+              className="text-green-700 hover:text-green-900 self-end sm:self-auto text-lg sm:text-xl"
             >
               ×
             </button>

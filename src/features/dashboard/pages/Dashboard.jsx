@@ -12,6 +12,7 @@ import DashboardDebugInfo from "./dashboard-debug-info"
 import { getRoleDisplayName, getUserRole } from "../../../shared/utils/roleDisplay"
 import { useGetRankingMetrics } from "../../Ranking/hooks/useGetRankingMetrics"
 import { generateRealRanking, getUniqueFichas, getUniqueProgramas } from "../../Ranking/services/rankingService"
+import ConfirmationModal from "../../../shared/components/ConfirmationModal"
 
 // Datos de ranking (mantenemos los datos estáticos para el ranking)
 const rankingDataByFicha = {

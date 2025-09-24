@@ -14,8 +14,8 @@ function App() {
     <Router>
       <div className="flex h-screen overflow-hidden">
         {isAuthenticated && <Navbar />}
-        <div className={`flex-1 overflow-auto ${!isAuthenticated ? "w-full" : ""}`}>
-          <div className="container mx-auto p-4">
+        <div className={`flex-1 overflow-auto ${!isAuthenticated ? "w-full" : "lg:ml-0"}`}>
+          <div className="container mx-auto p-4 lg:p-6">
             <Routes>
               {routes.map((route, index) => (
                 <Route

@@ -10,6 +10,8 @@ import Evaluations from "./features/Evaluations/pages/Evaluations"
 import Feedback from "./features/Feedback/pages/Feedback"
 import FeedbackDetails from "./features/Feedback/pages/FeedbackDetails"
 import StudentDetails from "./features/Feedback/pages/StudentDetails"
+import FeedbackExams from "./features/Feedback/pages/FeedbackExams"
+import FeedbackActivities from "./features/Feedback/pages/FeedbackActivities"
 import ScheduledCoursesPage from "./features/ScheduledCourses/pages/ScheduledCoursesPage"
 import Badges from "./features/Badges/pages/Badges"
 import Badges2 from "./features/Badges/pages/Badges2"
@@ -282,6 +284,22 @@ const routes = [
     element: (
       <ProtectedRoute requiredRoute="/progreso/retroalimentacion">
         <Feedback />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/progreso/retroalimentacion/examenes",
+    element: (
+      <ProtectedRoute requiredRoute="/progreso/retroalimentacion">
+        <FeedbackExams />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/progreso/retroalimentacion/actividades",
+    element: (
+      <ProtectedRoute requiredRoute="/progreso/retroalimentacion">
+        <FeedbackActivities />
       </ProtectedRoute>
     ),
   },

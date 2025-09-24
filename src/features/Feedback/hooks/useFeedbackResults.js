@@ -29,7 +29,7 @@ export const useFeedbackResults = () => {
       const filtersWithPagination = {
         ...filters,
         page: currentPage,
-        limit: 50 // Reducir límite para mejorar rendimiento
+        limit: 20 // Reducir límite para mejorar rendimiento
       }
       
       console.log('🔍 Buscando resultados con filtros:', filtersWithPagination)

@@ -161,7 +161,7 @@ const Badges = () => {
         <BadgeHeader 
           title={editingBadge ? "Editar Insignia" : "Crear Insignia"}
         />
-        <div className="container mx-auto px-4 sm:px-6 py-6 max-w-7xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl">
           <BadgeForm
             initialData={editingBadge}
             onSubmit={handleFormSubmit}
@@ -184,7 +184,7 @@ const Badges = () => {
     <div className="min-h-screen bg-white">
       <BadgeHeader title="Insignias" />
       
-      <div className="container mx-auto px-4 sm:px-6 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl">
 
 
         <BadgeTable
@@ -202,27 +202,27 @@ const Badges = () => {
         />
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Responsive */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 transform transition-all">
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-[#1f384c]">Eliminar Insignia</h3>
-                <p className="mt-2 text-[#627b87]">
+            <div className="p-4 sm:p-6">
+              <div className="text-center mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-[#1f384c]">Eliminar Insignia</h3>
+                <p className="mt-2 text-sm sm:text-base text-[#627b87]">
                   ¿Está seguro de que desea eliminar la insignia "{badgeToDelete?.name || badgeToDelete?.badgeName}"?
                 </p>
               </div>
 
-              <div className="flex justify-center gap-3">
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <button
-                  className="px-6 py-2.5 border border-[#d9d9d9] rounded-lg text-[#627b87] hover:bg-gray-50 font-medium transition-colors"
+                  className="px-4 sm:px-6 py-2.5 border border-[#d9d9d9] rounded-lg text-[#627b87] hover:bg-gray-50 font-medium transition-colors order-2 sm:order-1"
                   onClick={cancelDelete}
                 >
                   Cancelar
                 </button>
                 <button
-                  className="px-6 py-2.5 bg-[#f44144] text-white rounded-lg hover:bg-red-600 font-medium transition-colors"
+                  className="px-4 sm:px-6 py-2.5 bg-[#f44144] text-white rounded-lg hover:bg-red-600 font-medium transition-colors order-1 sm:order-2"
                   onClick={confirmDelete}
                 >
                   Eliminar
@@ -233,13 +233,13 @@ const Badges = () => {
         </div>
       )}
 
-      {/* Success Alert */}
+      {/* Success Alert - Responsive */}
       {showSuccessAlert && (
-        <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-xl w-full max-w-md mx-4 transform transition-all z-50">
-          <div className="p-4 flex items-center">
+        <div className="fixed bottom-4 right-4 left-4 sm:left-auto bg-white rounded-xl shadow-xl w-auto sm:w-full sm:max-w-md mx-auto sm:mx-0 transform transition-all z-50">
+          <div className="p-3 sm:p-4 flex items-start sm:items-center">
             <div className="flex-shrink-0 bg-green-100 rounded-full p-2 mr-3">
               <svg
-                className="h-5 w-5 text-green-600"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-green-600"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -251,26 +251,26 @@ const Badges = () => {
                 />
               </svg>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{successMessage}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-900 break-words">{successMessage}</p>
             </div>
             <button
               onClick={() => setShowSuccessAlert(false)}
-              className="ml-4 text-gray-400 hover:text-gray-500 focus:outline-none"
+              className="ml-2 sm:ml-4 text-gray-400 hover:text-gray-500 focus:outline-none flex-shrink-0"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         </div>
       )}
 
-      {/* Error Alert */}
+      {/* Error Alert - Responsive */}
       {showErrorAlert && (
-        <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-xl w-full max-w-md mx-4 transform transition-all z-50">
-          <div className="p-4 flex items-center">
+        <div className="fixed bottom-4 right-4 left-4 sm:left-auto bg-white rounded-xl shadow-xl w-auto sm:w-full sm:max-w-md mx-auto sm:mx-0 transform transition-all z-50">
+          <div className="p-3 sm:p-4 flex items-start sm:items-center">
             <div className="flex-shrink-0 bg-red-100 rounded-full p-2 mr-3">
               <svg
-                className="h-5 w-5 text-red-600"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-red-600"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -282,14 +282,14 @@ const Badges = () => {
                 />
               </svg>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{errorMessage}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-900 break-words">{errorMessage}</p>
             </div>
             <button
               onClick={() => setShowErrorAlert(false)}
-              className="ml-4 text-gray-400 hover:text-gray-500 focus:outline-none"
+              className="ml-2 sm:ml-4 text-gray-400 hover:text-gray-500 focus:outline-none flex-shrink-0"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         </div>

@@ -42,18 +42,18 @@ const Ranking = () => {
     <div className="min-h-screen bg-white">
       <BadgeHeader title="Ranking de Insignias" />
 
-      <div className="container mx-auto px-4 sm:px-6 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl">
 
 
-        {/* User Selection */}
-        <div className="mb-6">
+        {/* User Selection - Responsive */}
+        <div className="mb-4 sm:mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Seleccionar Usuario (opcional)
           </label>
           <select
             value={selectedUserId || ""}
             onChange={(e) => setSelectedUserId(e.target.value || null)}
-            className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
           >
             <option value="">Todos los usuarios</option>
             <option value="user1">Usuario 1</option>
@@ -62,18 +62,18 @@ const Ranking = () => {
           </select>
         </div>
 
-        {/* Badges Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Badges Grid - Responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {badges.map((badge) => (
             <div key={badge.id} className="relative">
               <BadgeCard
                 badge={badge}
                 showActions={false}
               />
-              <div className="absolute bottom-4 right-4">
+              <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4">
                 <button
                   onClick={() => handleAssignBadge(badge.id)}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+                  className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm rounded-lg transition-colors shadow-md hover:shadow-lg"
                 >
                   Asignar
                 </button>
@@ -82,35 +82,38 @@ const Ranking = () => {
           ))}
         </div>
 
+        {/* Empty State - Responsive */}
         {badges.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <p className="text-[#627b87] text-lg">No hay insignias disponibles</p>
+          <div className="text-center py-8 sm:py-12">
+            <p className="text-[#627b87] text-base sm:text-lg mb-4">No hay insignias disponibles</p>
             <button
               onClick={() => navigate("/programacion/insigneas")}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
             >
               Crear primera insignia
             </button>
           </div>
         )}
 
+        {/* Loading State - Responsive */}
         {loading && (
-          <div className="text-center py-12">
-            <p className="text-[#627b87] text-lg">Cargando insignias...</p>
+          <div className="text-center py-8 sm:py-12">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-[#627b87] text-base sm:text-lg">Cargando insignias...</p>
           </div>
         )}
       </div>
 
-      {/* Success Alert */}
+      {/* Success Alert - Responsive */}
       {showSuccessAlert && (
-        <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50">
-          <div className="flex items-center justify-between">
-            <span>{successMessage}</span>
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-4 bg-green-100 border border-green-400 text-green-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0">
+          <div className="flex items-start sm:items-center justify-between">
+            <span className="text-sm sm:text-base pr-2">{successMessage}</span>
             <button
               onClick={() => setShowSuccessAlert(false)}
-              className="ml-4 text-green-700 hover:text-green-900"
+              className="text-green-700 hover:text-green-900 flex-shrink-0"
             >
-              <X size={16} />
+              <X size={16} className="sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>

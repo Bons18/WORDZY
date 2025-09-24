@@ -2,16 +2,18 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Search, AlertCircle, CheckCircle, X, Brain, MessageCircle } from "lucide-react"
 import { useAuth } from "../../auth/hooks/useAuth"
 import { getRoleDisplayName, getUserRole } from "../../../shared/utils/roleDisplay"
 import ConfirmationModal from "../../../shared/components/ConfirmationModal"
 import GenericTable from "../../../shared/components/Table"
-import FeedbackFilters from "../components/FeedbackFilters"
 import { useFeedbackData } from "../hooks/useFeedbackData"
 import { useFeedbackResults } from "../hooks/useFeedbackResults"
 import StudentDetailPanel from "../components/StudentDetailPanel"
+import AIFeedbackPanel from "../components/AIFeedbackPanel"
+import ChatMentorPanel from "../components/ChatMentorPanel"
 import { useStudentDetails } from "../hooks/useStudentDetails"
+import aiService from "../services/aiService"
 
 const Feedback = () => {
   console.log("🚀 Renderizando componente Feedback")
@@ -24,6 +26,9 @@ const Feedback = () => {
   const dropdownRef = useRef(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedFeedbackItem, setSelectedFeedbackItem] = useState(null)
+  const [showAIFeedback, setShowAIFeedback] = useState(false)
+  const [selectedStudentForAI, setSelectedStudentForAI] = useState(null)
+  const [showChatMentor, setShowChatMentor] = useState(false)
 
   // Hooks para datos y búsqueda
   const { fichas, instructors, niveles, loading: dataLoading, error: dataError } = useFeedbackData()
@@ -122,10 +127,8 @@ const Feedback = () => {
     console.log("👁️ Mostrando detalle:", item)
     setSelectedFeedbackItem(item)
     setShowDetailModal(true)
-    // Navegar a detalles del aprendiz si es necesario
-    if (item.apprenticeId) {
-      navigate(`/feedback/student/${item.apprenticeId}`)
-    }
+    // Navegar a la página de detalles de retroalimentación
+    navigate(`/progreso/retroalimentacion/${item.id}`)
   }
 
   // Mostrar pantalla de carga mientras se cargan los datos iniciales
@@ -151,18 +154,25 @@ const Feedback = () => {
 
     useEffect(() => {
       if (feedbackItem?.id) {
+        console.log("🔄 Cargando datos para feedback ID:", feedbackItem.id)
         loadStudentData(feedbackItem.id)
       }
-    }, [feedbackItem?.id])
+    }, [feedbackItem?.id, loadStudentData])
+
+    // Log para verificar cambios en studentData
+    useEffect(() => {
+      console.log("📊 StudentData actualizado:", studentData.length, "estudiantes")
+      console.log("📋 Datos de estudiantes:", studentData)
+    }, [studentData])
 
     const studentColumns = [
-      { key: "aprendiz", label: "Aprendiz", width: "25%" },
-      { key: "ficha", label: "Ficha", width: "15%" },
-      { key: "hora", label: "Hora", width: "15%" },
+      { key: "aprendiz", label: "Aprendiz", width: "20%" },
+      { key: "ficha", label: "Ficha", width: "12%" },
+      { key: "hora", label: "Hora", width: "12%" },
       {
         key: "estado",
         label: "Estado",
-        width: "15%",
+        width: "12%",
         render: (item) => (
           <span
             className={`px-2 py-1 rounded-md text-xs font-medium ${
@@ -176,7 +186,7 @@ const Feedback = () => {
       {
         key: "calificacion",
         label: "Calificación",
-        width: "15%",
+        width: "12%",
         render: (item) => (
           <span
             className={`font-medium ${
@@ -191,11 +201,31 @@ const Feedback = () => {
           </span>
         ),
       },
+      {
+        key: "actions",
+        label: "Acciones",
+        width: "22%",
+        render: (item) => (
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleViewStudentDetail(item)}
+              className="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Ver Detalle
+            </button>
+          </div>
+        ),
+      },
     ]
 
     const handleViewStudentDetail = (student) => {
       setSelectedStudent(student)
       setShowStudentPanel(true)
+    }
+
+    const handleShowAIFeedback = (student) => {
+      setSelectedStudentForAI(student)
+      setShowAIFeedback(true)
     }
 
     if (loading) {
@@ -262,6 +292,7 @@ const Feedback = () => {
             <h4 className="text-lg font-medium text-[#1f384c]">Lista de Aprendices ({studentData.length})</h4>
           </div>
           <GenericTable
+            key={`feedback-table-${feedbackItem?.id}-${studentData.length}`}
             data={studentData}
             columns={studentColumns}
             onShow={handleViewStudentDetail}
@@ -319,14 +350,30 @@ const Feedback = () => {
       </header>
 
       <div className="container mx-auto px-6">
-        {/* Filtros de búsqueda */}
-        <FeedbackFilters
-          fichas={fichas}
-          instructors={instructors}
-          niveles={niveles}
-          onSearch={handleSearch}
-          loading={resultsLoading}
-        />
+        {/* Botones de acción para retroalimentación */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <h3 className="text-lg font-medium text-[#1f384c] mb-4">Retroalimentación con IA</h3>
+          <p className="text-gray-600 mb-4">
+            Utiliza la inteligencia artificial para generar retroalimentación personalizada para tus estudiantes.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+              <h4 className="font-medium text-blue-800 mb-2">Retroalimentación de Exámenes</h4>
+              <p className="text-sm text-blue-700 mb-4">
+                Analiza las respuestas de los estudiantes en exámenes y obtén retroalimentación detallada.
+              </p>
+              <button
+                onClick={() => navigate("/progreso/retroalimentacion/examenes")}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Ver Exámenes
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+
 
 
 
@@ -414,15 +461,7 @@ const Feedback = () => {
           </div>
         )}
 
-        {/* Mensaje de estado inicial */}
-        {!resultsLoading && results.length === 0 && !resultsError && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12">
-            <div className="text-center">
-              <p className="text-gray-500 text-lg mb-2">Utiliza los filtros para buscar resultados de retroalimentación</p>
-              <p className="text-gray-400 text-sm">Selecciona una ficha, nivel o instructor para comenzar</p>
-            </div>
-          </div>
-        )}
+
       </div>
 
       {/* Modal de detalle de retroalimentación */}
@@ -452,6 +491,26 @@ const Feedback = () => {
         confirmButtonText="Cerrar Sesión"
         confirmButtonClass="bg-[#f44144] hover:bg-red-600"
       />
+
+      {/* Panel de Retroalimentación IA */}
+      {showAIFeedback && selectedStudentForAI && (
+        <AIFeedbackPanel
+          student={selectedStudentForAI}
+          isOpen={showAIFeedback}
+          onClose={() => {
+            setShowAIFeedback(false)
+            setSelectedStudentForAI(null)
+          }}
+        />
+      )}
+
+      {/* Panel de Chat/Mentor */}
+      {showChatMentor && (
+        <ChatMentorPanel
+          isOpen={showChatMentor}
+          onClose={() => setShowChatMentor(false)}
+        />
+      )}
     </div>
   )
 }
